@@ -1,0 +1,1274 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  ArrowLeft, Save, Plus, X, Loader2, Package, DollarSign,
+  Tag, Star, Image as ImageIcon, Search, CheckCircle, AlertCircle,
+  ChevronDown, Trash2, Eye, Globe, Twitter, Info, EyeOff, User, Ruler
+} from 'lucide-react';
+import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
+import AdminLayout from '@/components/AdminLayout';
+import AdminLoading from '@/components/AdminLoading';
+import { FEATURED_PRODUCT_LIMIT } from '@/config/products';
+import { PRODUCT_COLLECTION_OPTIONS } from '@/lib/productCollections';
+import { PRODUCT_CONDITIONS, normalizeConditionValue } from '@/lib/conditions';
+
+const slugify = (value: string) =>
+  value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+type CheckoutFlow = 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct' | 'paypal-api';
+const ROTATABLE_CHECKOUT_FLOWS: CheckoutFlow[] = ['buymeacoffee', 'kofi', 'external'];
+const supportsCheckoutLinkRotation = (flow: CheckoutFlow) => ROTATABLE_CHECKOUT_FLOWS.includes(flow);
+
+interface Review {
+  id: string;
+  author: string;
+  avatar?: string;
+  rating: number;
+  date: string;
+  title: string;
+  content: string;
+  helpful?: number;
+  verified?: boolean;
+  location?: string;
+  purchaseDate?: string;
+  images?: string[] | string;
+}
+
+// Reusable Section Component
+function Section({
+  id,
+  icon: Icon,
+  title,
+  description,
+  children,
+  defaultOpen = true,
+  badge
+}: {
+  id: string;
+  icon: React.ElementType;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  badge?: string | number;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+      >
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-[#090A28]/10' : 'bg-gray-100'}`}>
+          <Icon className={`h-5 w-5 ${isOpen ? 'text-[#090A28]' : 'text-gray-500'}`} />
+        </div>
+        <div className="flex-1 text-left">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-[#262626]">{title}</h3>
+            {badge !== undefined && (
+              <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">{badge}</span>
+            )}
+          </div>
+          {description && <p className="text-sm text-gray-500 mt-0.5">{description}</p>}
+        </div>
+        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="px-5 pb-5 pt-2 border-t border-gray-100">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Input Field Component
+function Field({
+  label,
+  required,
+  hint,
+  children
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+export default function NewProductPage() {
+  const FEATURE_LIMIT = FEATURED_PRODUCT_LIMIT;
+  const router = useRouter();
+  const imageUploaderRef = useRef<ImageUploaderRef>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>({ uploading: false });
+  const [slugDirty, setSlugDirty] = useState(false);
+  const [featuredCount, setFeaturedCount] = useState(0);
+  const [formData, setFormData] = useState({
+    slug: '',
+    title: '',
+    description: '',
+    price: '',
+    original_price: '',
+    brand: '',
+    category: '',
+    condition: '',
+    checkout_link: '',
+    payee_email: '',
+    checkout_flow: 'buymeacoffee' as CheckoutFlow, // Checkout flow type
+    currency: 'USD',
+    images: '',
+    rating: '0',
+    review_count: '0',
+    is_featured: false,
+    published: false,
+    listed_by: '',
+    seller_id: '',
+    collections: [] as string[],
+    targetMarket: '',
+    hasSizes: false,
+    sizes: '',
+    has_mens_sizes: false,
+    sizes_mens: '',
+    has_womens_sizes: false,
+    sizes_womens: '',
+    rotate_links: false,
+    checkout_links: [] as string[],
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
+    metaOgTitle: '',
+    metaOgDescription: '',
+    metaOgImage: '',
+    metaTwitterTitle: '',
+    metaTwitterDescription: '',
+    metaTwitterImage: '',
+  });
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [editingReview, setEditingReview] = useState<{ index: number; data: Partial<Review> } | null>(null);
+
+  const [sellers, setSellers] = useState<{id: string, name: string, username: string}[]>([]);
+
+  useEffect(() => {
+    const loadFeaturedCount = async () => {
+      try {
+        const token = localStorage.getItem('admin_token');
+        const response = await fetch('/api/admin/products', {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const count = Array.isArray(data)
+          ? data.filter((product: any) => product?.isFeatured || product?.is_featured).length
+          : 0;
+        setFeaturedCount(count);
+      } catch (loadError) {
+        console.error('Failed to load featured count', loadError);
+      }
+    };
+
+    loadFeaturedCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchSellersList = async () => {
+      try {
+        const adminToken = localStorage.getItem('admin_token');
+        const res = await fetch('/api/admin/sellers', {
+          headers: { ...(adminToken && { 'Authorization': `Bearer ${adminToken}` }) }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSellers(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch sellers:', err);
+      }
+    };
+    fetchSellersList();
+  }, []);
+
+  const updateField = (field: string, value: any) => {
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === 'title' && !slugDirty) {
+        updated.slug = slugify(value);
+      }
+      if (field === 'checkout_flow' && !supportsCheckoutLinkRotation(value as CheckoutFlow)) {
+        updated.rotate_links = false;
+      }
+      return updated;
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent, saveAsDraft: boolean = false) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    setUploadStatus((prev) => ({ ...prev, uploading: false, message: undefined }));
+
+    try {
+      const sanitizedSlug = slugify(formData.slug || formData.title);
+      if (!sanitizedSlug) {
+        setError('Slug is required. Please provide a slug or title to generate one.');
+        setLoading(false);
+        return;
+      }
+
+      // First, upload any pending images
+      let finalImages: string[] = formData.images
+        .split(',')
+        .map((img) => img.trim())
+        .filter((img) => img.length > 0);
+
+      if (imageUploaderRef.current) {
+        try {
+          const { allImages } = await imageUploaderRef.current.uploadPendingImages();
+
+          if (allImages.length > 0) {
+            finalImages = allImages;
+            setFormData((prev) => ({
+              ...prev,
+              images: allImages.join(', '),
+            }));
+          }
+        } catch (uploadError: any) {
+          setError(`Image upload failed: ${uploadError.message}`);
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (!finalImages.length) {
+        setError('At least one image is required');
+        setLoading(false);
+        return;
+      }
+
+      const uniqueImages = Array.from(new Set(finalImages));
+      const rotationSupported = supportsCheckoutLinkRotation(formData.checkout_flow);
+      const rotationEnabled = rotationSupported && formData.rotate_links;
+      const sanitizedLinks = formData.checkout_links.map((link) => link.trim()).filter(Boolean);
+      const primaryCheckoutLink = formData.checkout_flow === 'paypal-api'
+        ? (formData.checkout_link.trim() || 'https://www.paypal.com/')
+        : rotationEnabled
+          ? (sanitizedLinks[0] || '')
+          : formData.checkout_link.trim();
+
+      if (rotationEnabled && sanitizedLinks.length === 0) {
+        setError('At least one checkout link is required when rotation is enabled.');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.checkout_flow !== 'paypal-api' && !primaryCheckoutLink) {
+        setError('Checkout link is required.');
+        setLoading(false);
+        return;
+      }
+
+      // Build meta object
+      const meta: any = {
+        published: saveAsDraft ? false : formData.published, // Store published status in meta (override if saving as draft)
+        targetMarket: formData.targetMarket || null,
+        hasSizes: formData.has_mens_sizes,
+        sizes: formData.sizes_mens || null,
+        has_mens_sizes: formData.has_mens_sizes,
+        sizes_mens: formData.sizes_mens || null,
+        has_womens_sizes: formData.has_womens_sizes,
+        sizes_womens: formData.sizes_womens || null,
+        rotate_links: rotationEnabled,
+        checkout_links: rotationEnabled ? sanitizedLinks : [],
+      };
+      ['Title', 'Description', 'Keywords', 'OgTitle', 'OgDescription', 'OgImage', 'TwitterTitle', 'TwitterDescription', 'TwitterImage']
+        .forEach(key => {
+          const val = formData[`meta${key}` as keyof typeof formData];
+          if (val) meta[key.charAt(0).toLowerCase() + key.slice(1)] = val;
+        });
+
+      // Process reviews
+      const processedReviews = reviews.map((review) => {
+        let imagesArray: string[] = [];
+        const reviewImages: string[] | string | undefined = review.images;
+        if (reviewImages) {
+          if (typeof reviewImages === 'string') {
+            imagesArray = reviewImages.split(',').map((img) => img.trim()).filter((img) => img.length > 0);
+          } else if (Array.isArray(reviewImages)) {
+            imagesArray = reviewImages;
+          }
+        }
+        return {
+          ...review,
+          images: imagesArray,
+        };
+      });
+
+      // Validate listed_by is selected
+      if (!formData.listed_by || formData.listed_by.trim() === '') {
+        setError('Listed by is required. Please select a user.');
+        setLoading(false);
+        return;
+      }
+
+      // Validate collections - REQUIRED FIELD
+      if (!formData.collections || formData.collections.length === 0) {
+        setError('❌ At least one collection must be selected. Please select at least one collection before creating the product.');
+        setLoading(false);
+        return;
+      }
+
+      const productData = {
+        slug: sanitizedSlug,
+        id: sanitizedSlug,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+        brand: formData.brand,
+        category: formData.category,
+        condition: normalizeConditionValue(formData.condition),
+        payee_email: formData.payee_email,
+        checkout_link: primaryCheckoutLink,
+        checkout_flow: formData.checkout_flow,
+        currency: formData.currency,
+        images: uniqueImages,
+        rating: parseFloat(formData.rating),
+        review_count: parseInt(formData.review_count),
+        reviewCount: parseInt(formData.review_count),
+        in_stock: true,
+        inStock: true,
+        is_featured: formData.is_featured,
+        isFeatured: formData.is_featured,
+        listed_by: formData.listed_by,
+        seller_id: formData.seller_id || null,
+        collections: formData.collections,
+        reviews: processedReviews.length > 0 ? processedReviews : [],
+        meta: Object.keys(meta).length > 0 ? meta : {},
+      };
+
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create product');
+      }
+
+      const product = await response.json();
+      setSuccess(saveAsDraft ? 'Product saved as draft!' : 'Product created successfully!');
+      // Update URL to edit page without redirecting
+      window.history.replaceState({}, '', `/admin/products/${product.slug}/edit`);
+      // Reload the page to show the edit view
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create product');
+    } finally {
+      setLoading(false);
+      setUploadStatus((prev) => ({ uploading: false, message: prev.message }));
+    }
+  };
+
+  const openReviewModal = (index?: number) => {
+    if (index !== undefined) {
+      setEditingReview({ index, data: { ...reviews[index] } });
+    } else {
+      setEditingReview({
+        index: -1,
+        data: { id: `r-${Date.now()}`, author: '', rating: 5, date: new Date().toISOString().split('T')[0], title: '', content: '', verified: true }
+      });
+    }
+    setShowReviewModal(true);
+  };
+
+  const saveReview = () => {
+    if (!editingReview?.data.author || !editingReview?.data.content) return;
+
+    const review = editingReview.data as Review;
+    if (editingReview.index === -1) {
+      setReviews([...reviews, review]);
+    } else {
+      const updated = [...reviews];
+      updated[editingReview.index] = review;
+      setReviews(updated);
+    }
+    setShowReviewModal(false);
+    setEditingReview(null);
+  };
+
+  const deleteReview = (index: number) => {
+    if (confirm('Delete this review?')) {
+      setReviews(reviews.filter((_, i) => i !== index));
+    }
+  };
+
+  const discount = formData.original_price && parseFloat(formData.original_price) > parseFloat(formData.price || '0')
+    ? Math.round((1 - parseFloat(formData.price || '0') / parseFloat(formData.original_price)) * 100)
+    : null;
+  const rotationSupported = supportsCheckoutLinkRotation(formData.checkout_flow);
+
+  return (
+    <AdminLayout>
+      {/* Compact Sticky Header */}
+      <div className="sticky top-0 z-50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm mb-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link href="/admin/products" className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
+              <ArrowLeft className="h-5 w-5 text-gray-500" />
+            </Link>
+            <div className="min-w-0">
+              <h1 className="font-semibold text-[#262626] truncate">{formData.title || 'New Product'}</h1>
+              <p className="text-xs text-gray-400">Creating new product</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Publish/Unpublish Toggle */}
+            <button
+              type="button"
+              onClick={() => updateField('published', !formData.published)}
+              className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors ${formData.published
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              {formData.published ? (
+                <>
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden sm:inline">Published</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  <span className="hidden sm:inline">Not Published</span>
+                </>
+              )}
+            </button>
+
+            {/* Preview Button - only show if product has a slug */}
+            {formData.slug && (
+              <Link
+                href={`/products/${formData.slug}`}
+                target="_blank"
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                title="Preview"
+              >
+                <Eye className="h-5 w-5 text-gray-500" />
+              </Link>
+            )}
+
+            {/* Save as Draft Button */}
+            <button
+              onClick={(e) => handleSubmit(e, true)}
+              disabled={loading || formData.collections.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              title={formData.collections.length === 0 ? 'Please select at least one collection' : ''}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {loading ? 'Saving...' : 'Save as Draft'}
+            </button>
+
+            {/* Create Product Button */}
+            <button
+              onClick={(e) => handleSubmit(e, false)}
+              disabled={loading || formData.collections.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white text-sm font-medium rounded-xl hover:bg-[#1c2070] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              title={formData.collections.length === 0 ? 'Please select at least one collection' : ''}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {loading ? 'Creating...' : 'Create Product'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts */}
+      {(error || success) && (
+        <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${error ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}>
+          {error ? <AlertCircle className="h-5 w-5 text-red-600" /> : <CheckCircle className="h-5 w-5 text-green-600" />}
+          <span className={error ? 'text-red-700' : 'text-green-700'}>{error || success}</span>
+          <button onClick={() => { setError(''); setSuccess(''); }} className="ml-auto p-1 hover:bg-white/50 rounded">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 1: PRICING
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="pricing" icon={DollarSign} title="Pricing" description="Set product price and payment details">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <Field label="Price" required>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => updateField('price', e.target.value)}
+                    placeholder="0.00"
+                    required
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  />
+                </div>
+              </Field>
+
+              <Field label="Original Price" hint="For discount display">
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.original_price}
+                    onChange={(e) => updateField('original_price', e.target.value)}
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  />
+                </div>
+              </Field>
+
+              <Field label="Currency">
+                <select
+                  value={formData.currency}
+                  onChange={(e) => updateField('currency', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                >
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                </select>
+              </Field>
+            </div>
+
+            {/* Discount Badge */}
+            {discount && (
+              <div className="inline-flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                <Tag className="h-4 w-4" />
+                <span className="font-medium">{discount}% OFF</span>
+                <span className="text-green-600">
+                  (Save ${(parseFloat(formData.original_price) - parseFloat(formData.price)).toFixed(2)})
+                </span>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-gray-100 space-y-4">
+              {rotationSupported && (
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="rotate_links"
+                    checked={formData.rotate_links}
+                    onChange={(e) => {
+                      updateField('rotate_links', e.target.checked);
+                      if (e.target.checked && (!formData.checkout_links || formData.checkout_links.length === 0)) {
+                        updateField('checkout_links', [formData.checkout_link || '']);
+                      }
+                    }}
+                    className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                  />
+                  <label htmlFor="rotate_links" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                    Enable Checkout Link Rotation (Load Distribution)
+                  </label>
+                </div>
+              )}
+
+              {formData.checkout_flow !== 'paypal-api' && (!rotationSupported || !formData.rotate_links ? (
+                <Field label="Checkout Link" required>
+                  <input
+                    type="url"
+                    value={formData.checkout_link}
+                    onChange={(e) => updateField('checkout_link', e.target.value)}
+                    placeholder="https://..."
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  />
+                </Field>
+              ) : (
+                <div className="space-y-3 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+                  <label className="text-sm font-bold text-gray-700 block">Configured Checkout Links</label>
+                  {(formData.checkout_links.length > 0 ? formData.checkout_links : ['']).map((link, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => {
+                          const newLinks = formData.checkout_links.length > 0 ? [...formData.checkout_links] : [''];
+                          newLinks[idx] = e.target.value;
+                          updateField('checkout_links', newLinks);
+                        }}
+                        placeholder={`https://checkout-link-${idx + 1}`}
+                        className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                        required
+                      />
+                      {(formData.checkout_links.length > 1) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newLinks = formData.checkout_links.filter((_, i) => i !== idx);
+                            updateField('checkout_links', newLinks.length > 0 ? newLinks : ['']);
+                          }}
+                          className="p-2.5 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl border border-red-100 transition-colors"
+                          aria-label="Remove checkout link"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => updateField('checkout_links', [...(formData.checkout_links || []), ''])}
+                    className="flex items-center gap-1.5 text-xs font-bold text-[#090A28] hover:text-[#0a3075] bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-sm transition-all"
+                  >
+                    <Plus className="h-3 w-3" /> Add checkout link
+                  </button>
+                </div>
+              ))}
+
+              <Field label="Checkout Flow" required hint="Select how customers will complete their purchase">
+                <select
+                  value={formData.checkout_flow}
+                  onChange={(e) => updateField('checkout_flow', e.target.value as CheckoutFlow)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                  required
+                >
+                  <option value="buymeacoffee">BuyMeACoffee (External - Redirects to payment link)</option>
+                  <option value="kofi">Ko-fi (Iframe - Embedded on your site)</option>
+                  <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
+                  <option value="external">External (Custom payment provider)</option>
+                  <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
+                  <option value="paypal-unclaimed">PayPal Unclaimed (Same as invoice flow for now)</option>
+                  <option value="paypal-direct">PayPal Redirect (PayPal Standard — direct payment to your PayPal email)</option>
+                  <option value="paypal-api">PayPal API Redirect (Orders API — secure Client ID and Client Secret)</option>
+                </select>
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                  <p className="text-xs text-blue-800">
+                    {formData.checkout_flow === 'kofi' ? (
+                      <>
+                        <strong>Ko-fi (Iframe):</strong> Customer stays on your site. Payment form loads in an embedded iframe after address confirmation.
+                      </>
+                    ) : formData.checkout_flow === 'stripe' ? (
+                      <>
+                        <strong>Stripe:</strong> Customer is redirected to Stripe&apos;s secure checkout page. Requires Stripe API keys in environment variables.
+                      </>
+                    ) : formData.checkout_flow === 'external' ? (
+                      <>
+                        <strong>External:</strong> Customer is redirected to your custom payment provider after address confirmation.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-invoice' ? (
+                      <>
+                        <strong>PayPal Invoice:</strong> Customer sees an on-site &ldquo;Order Confirmed — Pending Payment&rdquo; screen. A PayPal invoice is sent to their email.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-unclaimed' ? (
+                      <>
+                        <strong>PayPal Unclaimed:</strong> Uses the same on-site invoice/request flow as PayPal Invoice for now.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-direct' ? (
+                      <>
+                        <strong>PayPal Redirect:</strong> Customer is redirected to PayPal Standard after address confirmation. Buyer pays the email configured in Payment Settings.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-api' ? (
+                      <>
+                        <strong>PayPal API Redirect:</strong> Customer confirms their address, approves the order on PayPal, and returns after a server-side capture. Uses the API credentials in Payment Settings.
+                      </>
+                    ) : (
+                      <>
+                        <strong>BuyMeACoffee (External):</strong> Customer is redirected to external checkout link after address confirmation.
+                      </>
+                    )}
+                  </p>
+                </div>
+              </Field>
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 1.2: SIZING OPTIONS
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="sizing" icon={Ruler} title="Sizing Options" description="Enable sizing options for sneakers or clothing">
+          <div className="space-y-6">
+            {/* Men's Sizing Group */}
+            <div className="p-4 bg-gray-50/50 rounded-xl border border-gray-100 space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="has_mens_sizes"
+                  checked={formData.has_mens_sizes}
+                  onChange={(e) => {
+                    updateField('has_mens_sizes', e.target.checked);
+                  }}
+                  className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                />
+                <label htmlFor="has_mens_sizes" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  Enable Men&apos;s Sizing Range
+                </label>
+              </div>
+
+              {formData.has_mens_sizes && (
+                <div className="pl-8 pt-1">
+                  <Field label="Men&apos;s Sizes" hint="Enter sizes separated by commas (e.g. UK 6, UK 7, UK 8, UK 9)">
+                    <input
+                      type="text"
+                      value={formData.sizes_mens}
+                      onChange={(e) => updateField('sizes_mens', e.target.value)}
+                      placeholder="e.g. UK 6, UK 7, UK 8, UK 9"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                      required={formData.has_mens_sizes}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            {/* Women's Sizing Group */}
+            <div className="p-4 bg-gray-50/50 rounded-xl border border-gray-100 space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="has_womens_sizes"
+                  checked={formData.has_womens_sizes}
+                  onChange={(e) => {
+                    updateField('has_womens_sizes', e.target.checked);
+                  }}
+                  className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                />
+                <label htmlFor="has_womens_sizes" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  Enable Women&apos;s Sizing Range
+                </label>
+              </div>
+
+              {formData.has_womens_sizes && (
+                <div className="pl-8 pt-1">
+                  <Field label="Women&apos;s Sizes" hint="Enter sizes separated by commas (e.g. UK 4, UK 5, UK 6, UK 7)">
+                    <input
+                      type="text"
+                      value={formData.sizes_womens}
+                      onChange={(e) => updateField('sizes_womens', e.target.value)}
+                      placeholder="e.g. UK 4, UK 5, UK 6, UK 7"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                      required={formData.has_womens_sizes}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 1.5: SELLER ASSIGNMENT
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="seller" icon={User} title="Seller Assignment" description="Assign product to a seller">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Listed by" required hint="Internal only">
+              <select
+                value={formData.listed_by}
+                onChange={(e) => updateField('listed_by', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                required
+              >
+                <option value="">Select a user</option>
+                <option value="walid">walid</option>
+                <option value="abdo">abdo</option>
+                <option value="jebbar">jebbar</option>
+                <option value="amine">amine</option>
+                <option value="mehdi">mehdi</option>
+                <option value="othmane">othmane</option>
+                <option value="janah">janah</option>
+                <option value="youssef">youssef</option>
+                <option value="yassine">yassine</option>
+              </select>
+            </Field>
+
+            <Field label="Public Seller" hint="The storefront seller for this listing">
+              <select
+                value={formData.seller_id}
+                onChange={(e) => updateField('seller_id', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+              >
+                <option value="">Unassigned (Fallback: Bricoc)</option>
+                {sellers.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} (@{s.username})</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 2: BASIC INFO
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="basic" icon={Package} title="Basic Information" description="Title, description, and product details">
+          <div className="space-y-4">
+            <Field label="Product Title" required>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => updateField('title', e.target.value)}
+                placeholder="Enter product title"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                required
+              />
+            </Field>
+
+            <Field label="URL Slug" hint="Auto-generated from title. Only lowercase letters, numbers, and hyphens.">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-2">/products/</span>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => { setSlugDirty(true); updateField('slug', slugify(e.target.value)); }}
+                  placeholder="product-url"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </div>
+            </Field>
+
+            <Field label="Description">
+              <textarea
+                value={formData.description}
+                onChange={(e) => updateField('description', e.target.value)}
+                placeholder="Describe the product..."
+                rows={4}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <Field label="Brand">
+                <input
+                  type="text"
+                  value={formData.brand}
+                  onChange={(e) => updateField('brand', e.target.value)}
+                  placeholder="Brand"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </Field>
+              <Field label="Category">
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) => updateField('category', e.target.value)}
+                  placeholder="Category"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </Field>
+              <Field label="Condition">
+                <select
+                  value={formData.condition}
+                  onChange={(e) => updateField('condition', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                >
+                  <option value="">Select</option>
+                  {PRODUCT_CONDITIONS.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+
+
+            <Field label="Collections" required hint="Select at least one collection. Products can belong to multiple collections.">
+              {formData.collections.length === 0 && (
+                <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800 font-medium">
+                    ⚠️ At least one collection is required to create a product
+                  </p>
+                </div>
+              )}
+              <div className="space-y-2">
+                {PRODUCT_COLLECTION_OPTIONS.map((collection) => (
+                  <label key={collection.value} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      checked={formData.collections.includes(collection.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          updateField('collections', [...formData.collections, collection.value]);
+                        } else {
+                          updateField('collections', formData.collections.filter(c => c !== collection.value));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28]"
+                      required={formData.collections.length === 0}
+                    />
+                    <span className="text-sm text-gray-700">{collection.label}</span>
+                  </label>
+                ))}
+              </div>
+            </Field>
+
+            {/* Toggle Switches */}
+            <div className="flex flex-wrap gap-6 pt-4 border-t border-gray-100">
+              <label className={`inline-flex items-center gap-3 cursor-pointer ${featuredCount >= FEATURE_LIMIT && !formData.is_featured ? 'opacity-50' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={formData.is_featured}
+                  onChange={(e) => updateField('is_featured', e.target.checked)}
+                  disabled={featuredCount >= FEATURE_LIMIT && !formData.is_featured}
+                  className="sr-only peer"
+                />
+                <div className="relative w-10 h-6 bg-gray-200 rounded-full peer-checked:bg-[#0a3075] transition-colors">
+                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+                </div>
+                <span className="text-sm text-gray-700">Featured</span>
+                <span className="text-xs text-gray-400">({featuredCount}/{FEATURE_LIMIT})</span>
+              </label>
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 3: IMAGES
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="media" icon={ImageIcon} title="Images" description="Upload product photos">
+          {formData.slug ? (
+            <>
+              <ImageUploader
+                ref={imageUploaderRef}
+                productSlug={formData.slug}
+                currentImages={formData.images.split(',').map(s => s.trim()).filter(Boolean)}
+                onImagesUpdate={(urls) => updateField('images', urls.join(', '))}
+                onUploadStatusChange={setUploadStatus}
+              />
+              {uploadStatus.message && (
+                <p className={`mt-3 text-sm ${uploadStatus.uploading ? 'text-[#090A28]' : 'text-gray-500'}`}>
+                  {uploadStatus.message}
+                </p>
+              )}
+
+              {/* Rating override */}
+              <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-100">
+                <Field label="Display Rating" hint="0-5 stars">
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    value={formData.rating}
+                    onChange={(e) => updateField('rating', e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  />
+                </Field>
+                <Field label="Review Count" hint="Displayed review count">
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.review_count}
+                    onChange={(e) => updateField('review_count', e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  />
+                </Field>
+              </div>
+            </>
+          ) : (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <p className="text-sm text-yellow-800">
+                Please enter a product slug first to enable image upload.
+              </p>
+            </div>
+          )}
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 4: SEO (collapsed by default)
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="seo" icon={Search} title="SEO Settings" description="Search engine & social sharing" defaultOpen={false}>
+          <div className="space-y-6">
+            {/* Basic SEO */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Search Engine</h4>
+              <Field label="Meta Title" hint={`${(formData.metaTitle || formData.title).length}/60 characters`}>
+                <input
+                  type="text"
+                  value={formData.metaTitle}
+                  onChange={(e) => updateField('metaTitle', e.target.value)}
+                  placeholder={formData.title || 'Page title'}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </Field>
+              <Field label="Meta Description" hint={`${formData.metaDescription.length}/160 characters`}>
+                <textarea
+                  value={formData.metaDescription}
+                  onChange={(e) => updateField('metaDescription', e.target.value)}
+                  placeholder="Brief description for search results"
+                  rows={2}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
+                />
+              </Field>
+              <Field label="Keywords" hint="Comma separated">
+                <input
+                  type="text"
+                  value={formData.metaKeywords}
+                  onChange={(e) => updateField('metaKeywords', e.target.value)}
+                  placeholder="keyword1, keyword2, keyword3"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </Field>
+            </div>
+
+            {/* Open Graph */}
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <Globe className="h-4 w-4" /> Open Graph
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="OG Title">
+                  <input type="text" value={formData.metaOgTitle} onChange={(e) => updateField('metaOgTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                </Field>
+                <Field label="OG Image URL">
+                  <input type="url" value={formData.metaOgImage} onChange={(e) => updateField('metaOgImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                </Field>
+              </div>
+              <Field label="OG Description">
+                <textarea value={formData.metaOgDescription} onChange={(e) => updateField('metaOgDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
+              </Field>
+            </div>
+
+            {/* Twitter */}
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <Twitter className="h-4 w-4" /> Twitter Card
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Twitter Title">
+                  <input type="text" value={formData.metaTwitterTitle} onChange={(e) => updateField('metaTwitterTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                </Field>
+                <Field label="Twitter Image URL">
+                  <input type="url" value={formData.metaTwitterImage} onChange={(e) => updateField('metaTwitterImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                </Field>
+              </div>
+              <Field label="Twitter Description">
+                <textarea value={formData.metaTwitterDescription} onChange={(e) => updateField('metaTwitterDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
+              </Field>
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 5: REVIEWS (collapsed by default)
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="reviews" icon={Star} title="Reviews" description="Manage customer reviews" defaultOpen={false} badge={reviews.length}>
+          <div className="space-y-4">
+            {reviews.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <Star className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>No reviews yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {reviews.map((review, i) => (
+                  <div key={review.id || i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl group">
+                    <div className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
+                      {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
+                        <Image src={review.avatar} alt={review.author} width={36} height={36} unoptimized={true} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-9 h-9 bg-gradient-to-br from-[#090A28] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {review.author?.charAt(0)?.toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[#262626] text-sm">{review.author}</span>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`h-3 w-3 ${s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                        {review.verified && <CheckCircle className="h-3 w-3 text-green-500" />}
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{review.content}</p>
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button type="button" onClick={() => openReviewModal(i)} className="p-1.5 hover:bg-white rounded-lg">
+                        <Info className="h-4 w-4 text-gray-400" />
+                      </button>
+                      <button type="button" onClick={() => deleteReview(i)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                        <Trash2 className="h-4 w-4 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => openReviewModal()}
+              className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-[#090A28]/30 hover:text-[#090A28] transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Review
+            </button>
+          </div>
+        </Section>
+
+      </form>
+
+      {/* Review Modal */}
+      {showReviewModal && editingReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowReviewModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-semibold text-[#262626]">{editingReview.index === -1 ? 'Add Review' : 'Edit Review'}</h3>
+              <button onClick={() => setShowReviewModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                <X className="h-5 w-5 text-gray-400" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Avatar Upload */}
+              <div className="flex items-center gap-4">
+                <label className="relative cursor-pointer group flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#090A28] transition-colors flex items-center justify-center">
+                    {typeof editingReview.data.avatar === 'string' && editingReview.data.avatar.length > 0 ? (
+                      <Image src={editingReview.data.avatar} alt="Avatar" width={64} height={64} unoptimized={true} className="w-full h-full object-cover" />
+                    ) : (
+                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setEditingReview({ ...editingReview, data: { ...editingReview.data, avatar: reader.result as string } });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-700">Profile Picture <span className="text-gray-400 font-normal">(optional)</span></p>
+                  <p className="text-xs text-gray-400 mt-0.5">Click the circle to upload. If skipped, a default person icon is used.</p>
+                  {editingReview.data.avatar && (
+                    <button type="button" onClick={() => setEditingReview({ ...editingReview, data: { ...editingReview.data, avatar: '' } })} className="text-xs text-red-500 hover:text-red-700 mt-1">Remove photo</button>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Author" required>
+                  <input
+                    type="text"
+                    value={editingReview.data.author || ''}
+                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, author: e.target.value } })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
+                  />
+                </Field>
+                <Field label="Rating">
+                  <select
+                    value={editingReview.data.rating || 5}
+                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, rating: parseInt(e.target.value) } })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none bg-white"
+                  >
+                    {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                </Field>
+              </div>
+              <Field label="Title">
+                <input
+                  type="text"
+                  value={editingReview.data.title || ''}
+                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, title: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
+                />
+              </Field>
+              <Field label="Content" required>
+                <textarea
+                  value={editingReview.data.content || ''}
+                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, content: e.target.value } })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none resize-none"
+                />
+              </Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Location">
+                  <input
+                    type="text"
+                    value={editingReview.data.location || ''}
+                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, location: e.target.value } })}
+                    placeholder="City, State"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
+                  />
+                </Field>
+                <Field label="Date">
+                  <input
+                    type="date"
+                    value={editingReview.data.date || ''}
+                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, date: e.target.value } })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
+                  />
+                </Field>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingReview.data.verified ?? true}
+                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, verified: e.target.checked } })}
+                  className="w-4 h-4 rounded text-[#090A28] focus:ring-[#090A28]"
+                />
+                <span className="text-sm text-gray-700">Verified Purchase</span>
+              </label>
+            </div>
+            <div className="p-5 border-t border-gray-100 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowReviewModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                Cancel
+              </button>
+              <button type="button" onClick={saveReview} className="px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]">
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
+  );
+}

@@ -1,0 +1,364 @@
+import 'server-only';
+import nodemailer from 'nodemailer';
+import { updateOrderEmailStatus, getOrderById } from '@/lib/supabase/orders';
+import { supabaseAdmin } from '@/lib/supabase/server';
+import { resolveBaseUrl } from '@/lib/url';
+
+// Create transporter (in serverless, each invocation is isolated)
+const createTransporter = (): nodemailer.Transporter => {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  if (!emailUser || !emailPass) {
+    throw new Error(
+      'Missing email environment variables. Please set EMAIL_USER and EMAIL_PASS'
+    );
+  }
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+    secure: false,
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+  });
+};
+
+const parseFullOrderData = (rawData: unknown): Record<string, any> | undefined => {
+  if (!rawData) {
+    return undefined;
+  }
+
+  if (typeof rawData === 'object') {
+    return rawData as Record<string, any>;
+  }
+
+  if (typeof rawData === 'string') {
+    try {
+      return JSON.parse(rawData) as Record<string, any>;
+    } catch {
+      console.warn('⚠️ Unable to parse full_order_data string');
+    }
+  }
+
+  return undefined;
+};
+
+const getExtendedShippingDetails = (
+  order: Record<string, any>,
+  parsedFullOrderData = parseFullOrderData(order.full_order_data)
+) => {
+  const shippingData = parsedFullOrderData?.shippingData || {};
+  const country = order.shipping_country || shippingData.country || '';
+  const countryCode = order.shipping_country_code || shippingData.countryCode || '';
+
+  return {
+    addressLine2: order.shipping_address_line_2 || shippingData.addressLine2 || '',
+    country: country && countryCode ? `${country} (${countryCode})` : country || countryCode,
+  };
+};
+
+/**
+ * Send email for an order (used by background retry system)
+ */
+export async function sendOrderEmail(order: any): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { product_title, product_price, product_slug, customer_name, customer_email, customer_phone, shipping_address, shipping_city, shipping_state, shipping_zip, full_order_data } = order;
+    const parsedFullOrderData = parseFullOrderData(full_order_data);
+    const extendedShipping = getExtendedShippingDetails(order, parsedFullOrderData);
+    const selectedSize = parsedFullOrderData?.product?.selectedSize || null;
+    const baseUrl = resolveBaseUrl([
+      parsedFullOrderData?.siteUrl,
+      parsedFullOrderData?.siteOrigin,
+      order.site_url,
+    ]);
+    const normalizedSlug = typeof product_slug === 'string' ? product_slug.replace(/^\/+/, '') : '';
+    const productPath = normalizedSlug ? `/products/${normalizedSlug}` : '';
+    const productUrl = `${baseUrl}${productPath}`;
+
+    // Fetch product details from database to get listed_by and checkout_flow
+    let listedBy: string | null = null;
+    let checkoutFlow = 'Not specified';
+
+    if (normalizedSlug) {
+      try {
+        const { data: product, error: productError } = await supabaseAdmin
+          .from('products')
+          .select('listed_by, checkout_flow')
+          .eq('slug', normalizedSlug)
+          .single();
+
+        if (productError) {
+          console.warn(`⚠️ Could not fetch product details for slug "${normalizedSlug}":`, productError.message);
+        } else if (product) {
+          listedBy = product.listed_by;
+          checkoutFlow = product.checkout_flow || 'Not specified';
+        }
+      } catch (productFetchError) {
+        console.warn('⚠️ Error fetching product details:', productFetchError);
+      }
+    }
+
+    // Format checkout flow for display
+    const formatCheckoutFlow = (flow: string): string => {
+      const flowMap: Record<string, string> = {
+        'stripe': 'Stripe',
+        'kofi': 'Ko-fi',
+        'buymeacoffee': 'Buy Me a Coffee',
+        'external': 'External',
+        'paypal-invoice': 'PayPal Invoice',
+        'paypal-unclaimed': 'PayPal Unclaimed',
+        'paypal-direct': 'PayPal Checkout Direct',
+        'paypal-api': 'PayPal API Checkout',
+      };
+      return flowMap[flow] || flow;
+    };
+
+    const transporter = createTransporter();
+    const emailUser = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
+
+    const emailContent = `
+      <h2>New Order Shipping Information</h2>
+      
+      <h3>Product Details:</h3>
+      <ul>
+        <li><strong>Product:</strong> ${product_title}</li>
+        ${selectedSize ? `<li><strong>Selected Size:</strong> ${selectedSize}</li>` : ''}
+        <li><strong>Price:</strong> $${product_price}</li>
+        <li><strong>Listed By:</strong> ${listedBy || 'Not specified'}</li>
+        <li><strong>Checkout Flow:</strong> ${formatCheckoutFlow(checkoutFlow)}</li>
+        <li><strong>Product URL:</strong> ${productUrl}</li>
+      </ul>
+
+      <h3>Shipping Address:</h3>
+      <ul>
+        <li><strong>Street Address:</strong> ${shipping_address}</li>
+        ${extendedShipping.addressLine2 ? `<li><strong>Apartment / Unit:</strong> ${extendedShipping.addressLine2}</li>` : ''}
+        <li><strong>City:</strong> ${shipping_city}</li>
+        <li><strong>State/Province:</strong> ${shipping_state}</li>
+        <li><strong>Zip Code:</strong> ${shipping_zip}</li>
+        ${extendedShipping.country ? `<li><strong>Country:</strong> ${extendedShipping.country}</li>` : ''}
+        <li><strong>Email:</strong> ${customer_email}</li>
+        <li><strong>Phone Number:</strong> ${customer_phone || 'Not provided'}</li>
+      </ul>
+
+      <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+    `;
+
+    const mailOptions = {
+      from: emailUser,
+      to: 'contacthappydeel@gmail.com',
+      subject: `New Order - ${product_title}`,
+      html: emailContent,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully for order ${order.id}:`, info.messageId);
+
+    // Update order: email sent successfully
+    await updateOrderEmailStatus(order.id, true, undefined, 0, null);
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    const errorMessage = err.message || 'Unknown error';
+    console.error(`❌ Failed to send email for order ${order.id}:`, errorMessage);
+
+    // Calculate next retry time (exponential backoff: 5min, 15min, 30min, 1hr, 2hr)
+    const retryCount = (order.email_retry_count || 0) + 1;
+    const retryDelays = [5, 15, 30, 60, 120]; // minutes
+    const delayMinutes = retryDelays[Math.min(retryCount - 1, retryDelays.length - 1)];
+    const nextRetryAt = new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
+
+    // Update order: email failed, schedule retry
+    await updateOrderEmailStatus(order.id, false, errorMessage, retryCount, nextRetryAt);
+
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Background email sender - doesn't block, runs async
+ */
+export async function sendOrderEmailAsync(orderId: string): Promise<void> {
+  // Don't await - fire and forget
+  // Use setImmediate or Promise.resolve().then() to ensure it runs after current execution
+  Promise.resolve().then(async () => {
+    try {
+      console.log(`📧 [Async] Starting email send for order ${orderId}...`);
+      const order = await getOrderById(orderId);
+
+      if (!order) {
+        console.error(`❌ [Async] Order ${orderId} not found in database`);
+        return;
+      }
+
+      console.log(`📧 [Async] Order found, sending email...`);
+      const result = await sendOrderEmail(order);
+
+      if (result.success) {
+        console.log(`✅ [Async] Email sent successfully for order ${orderId}`);
+      } else {
+        console.error(`❌ [Async] Email failed for order ${orderId}:`, result.error);
+      }
+    } catch (error) {
+      console.error(`❌ [Async] Error in async email send for order ${orderId}:`, error);
+      if (error instanceof Error) {
+        console.error(`Error stack:`, error.stack);
+      }
+    }
+  }).catch((error) => {
+    console.error(`❌ [Async] Unhandled error in email async handler for order ${orderId}:`, error);
+  });
+}
+
+/**
+ * Send a dedicated PayPal payment success notification after IPN confirmation.
+ * This is separate from the checkout-intent email and should only fire after PayPal confirms payment.
+ */
+export async function sendPaypalPaymentSuccessEmail(
+  order: any,
+  payment: {
+    txnId?: string;
+    paymentStatus?: string;
+    mcGross?: string;
+    mcCurrency?: string;
+    payerEmail?: string;
+    receiverEmail?: string;
+    raw?: Record<string, string>;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const emailUser = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
+    const extendedShipping = getExtendedShippingDetails(order);
+
+    const productUrl = order?.product_slug
+      ? `${resolveBaseUrl([order?.site_url])}/products/${String(order.product_slug).replace(/^\/+/, '')}`
+      : 'Not available';
+
+    const mailOptions = {
+      from: emailUser,
+      to: 'contacthappydeel@gmail.com',
+      subject: `PayPal Payment Confirmed - ${order.product_title}`,
+      html: `
+        <h2>PayPal Payment Confirmed</h2>
+
+        <h3>Order Details</h3>
+        <ul>
+          <li><strong>Order ID:</strong> ${order.id}</li>
+          <li><strong>Product:</strong> ${order.product_title}</li>
+          <li><strong>Product URL:</strong> ${productUrl}</li>
+          <li><strong>Order Amount:</strong> ${order.product_price}</li>
+          <li><strong>Order Flow:</strong> ${order.checkout_flow || 'Not specified'}</li>
+        </ul>
+
+        <h3>PayPal Details</h3>
+        <ul>
+          <li><strong>Transaction ID:</strong> ${payment.txnId || 'Not provided'}</li>
+          <li><strong>Payment Status:</strong> ${payment.paymentStatus || 'Not provided'}</li>
+          <li><strong>Gross Amount:</strong> ${payment.mcGross || 'Not provided'}</li>
+          <li><strong>Currency:</strong> ${payment.mcCurrency || 'Not provided'}</li>
+          <li><strong>Payer Email:</strong> ${payment.payerEmail || order.customer_email || 'Not provided'}</li>
+          <li><strong>Receiver Email:</strong> ${payment.receiverEmail || 'Not provided'}</li>
+        </ul>
+
+        <h3>Shipping Address</h3>
+        <ul>
+          <li><strong>Email:</strong> ${order.customer_email}</li>
+          <li><strong>Street Address:</strong> ${order.shipping_address}</li>
+          ${extendedShipping.addressLine2 ? `<li><strong>Apartment / Unit:</strong> ${extendedShipping.addressLine2}</li>` : ''}
+          <li><strong>City:</strong> ${order.shipping_city}</li>
+          <li><strong>State/Province:</strong> ${order.shipping_state}</li>
+          <li><strong>Zip Code:</strong> ${order.shipping_zip}</li>
+          ${extendedShipping.country ? `<li><strong>Country:</strong> ${extendedShipping.country}</li>` : ''}
+        </ul>
+
+        <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+        <p><strong>IPN Received:</strong> ${new Date().toLocaleString()}</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ PayPal payment notification sent successfully for order ${order.id}:`, info.messageId);
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    const errorMessage = err.message || 'Unknown error';
+    console.error(`❌ Failed to send PayPal payment notification for order ${order.id}:`, errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+export async function sendPaypalUnclaimedProofEmail(
+  order: any,
+  proof: {
+    proofUrl: string;
+    payeeEmail: string;
+    payerEmail?: string;
+    amount?: string;
+    currency?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const emailUser = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
+    const extendedShipping = getExtendedShippingDetails(order);
+
+    const productUrl = order?.product_slug
+      ? `${resolveBaseUrl([order?.site_url])}/products/${String(order.product_slug).replace(/^\/+/, '')}`
+      : 'Not available';
+
+    const mailOptions = {
+      from: emailUser,
+      to: 'contacthappydeel@gmail.com',
+      subject: `PayPal Proof Uploaded - ${order.product_title}`,
+      html: `
+        <h2>PayPal Unclaimed Proof Uploaded</h2>
+
+        <h3>Order Details</h3>
+        <ul>
+          <li><strong>Order ID:</strong> ${order.id}</li>
+          <li><strong>Product:</strong> ${order.product_title}</li>
+          <li><strong>Product URL:</strong> ${productUrl}</li>
+          <li><strong>Checkout Flow:</strong> ${order.checkout_flow || 'Not specified'}</li>
+        </ul>
+
+        <h3>Payment Details</h3>
+        <ul>
+          <li><strong>Payee Email:</strong> ${proof.payeeEmail}</li>
+          <li><strong>Payer Email:</strong> ${proof.payerEmail || order.customer_email || 'Not provided'}</li>
+          <li><strong>Amount:</strong> ${proof.amount || order.product_price}</li>
+          <li><strong>Currency:</strong> ${proof.currency || 'USD'}</li>
+          <li><strong>Proof URL:</strong> <a href="${proof.proofUrl}" target="_blank" rel="noopener noreferrer">${proof.proofUrl}</a></li>
+        </ul>
+
+        <h3>Shipping Address</h3>
+        <ul>
+          <li><strong>Email:</strong> ${order.customer_email}</li>
+          <li><strong>Street Address:</strong> ${order.shipping_address}</li>
+          ${extendedShipping.addressLine2 ? `<li><strong>Apartment / Unit:</strong> ${extendedShipping.addressLine2}</li>` : ''}
+          <li><strong>City:</strong> ${order.shipping_city}</li>
+          <li><strong>State/Province:</strong> ${order.shipping_state}</li>
+          <li><strong>Zip Code:</strong> ${order.shipping_zip}</li>
+          ${extendedShipping.country ? `<li><strong>Country:</strong> ${extendedShipping.country}</li>` : ''}
+        </ul>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    const errorMessage = err.message || 'Unknown error';
+    console.error('❌ Failed to send PayPal unclaimed proof email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}

@@ -1,0 +1,1 @@
+export const FEATURED_PRODUCT_LIMIT = 18;
