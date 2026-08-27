@@ -463,7 +463,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
           <p className="text-gray-600 mb-8">The product you&apos;re looking for doesn&apos;t exist.</p>
           <Link
             href="/"
-            className="inline-block bg-[#0a3075] hover:bg-[#0a0f32] text-[#F0F6FF] px-6 py-3 rounded-lg transition-colors duration-300"
+            className="inline-block bg-[#233F31] hover:bg-[#1a3025] text-[#FAF6EB] font-semibold px-7 py-3.5 rounded-full shadow-sm transition-all duration-200"
           >
             Return to Home
           </Link>
@@ -483,7 +483,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
           <p className="text-gray-600 mb-8">The product information is incomplete.</p>
           <Link
             href="/"
-            className="inline-block bg-[#0a3075] hover:bg-[#0a0f32] text-[#F0F6FF] px-6 py-3 rounded-lg transition-colors duration-300"
+            className="inline-block bg-[#233F31] hover:bg-[#1a3025] text-[#FAF6EB] font-semibold px-7 py-3.5 rounded-full shadow-sm transition-all duration-200"
           >
             Return to Home
           </Link>
@@ -538,7 +538,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       <button
                         key={idx}
                         onClick={() => setActiveImage(idx)}
-                        className={`relative flex-shrink-0 w-20 h-20 rounded-md overflow-hidden ${activeImage === idx ? 'ring-2 ring-[#0a3075]' : 'ring-1 ring-gray-200'}`}
+                        className={`relative flex-shrink-0 w-20 h-20 rounded-md overflow-hidden ${activeImage === idx ? 'ring-2 ring-[#233F31]' : 'ring-1 ring-gray-200'}`}
                       >
                         <Image
                           src={image}
@@ -560,10 +560,10 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
               )}
               {images.length > 1 && (
                 <>
-                  <button onClick={() => setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1))} className="absolute left-4 top-1/2 -translate-y-1/2 transform bg-white/80 hover:bg-[#0a3075] hover:text-[#F0F6FF] p-2 rounded-full transition-all duration-300 z-10">
+                  <button onClick={() => setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1))} className="absolute left-4 top-1/2 -translate-y-1/2 transform bg-white/80 hover:bg-[#233F31] hover:text-[#FAF6EB] p-2 rounded-full transition-all duration-300 z-10 text-[#233F31]">
                     <ChevronLeft className="h-6 w-6" />
                   </button>
-                  <button onClick={() => setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0))} className="absolute right-4 top-1/2 -translate-y-1/2 transform bg-white/80 hover:bg-[#0a3075] hover:text-[#F0F6FF] p-2 rounded-full transition-all duration-300 z-10">
+                  <button onClick={() => setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0))} className="absolute right-4 top-1/2 -translate-y-1/2 transform bg-white/80 hover:bg-[#233F31] hover:text-[#FAF6EB] p-2 rounded-full transition-all duration-300 z-10 text-[#233F31]">
                     <ChevronRight className="h-6 w-6" />
                   </button>
                 </>
@@ -571,7 +571,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
             </div>
 
             <div className="lg:pr-4">
-              <h1 className="text-3xl font-medium text-[#262626] mb-1">{title}</h1>
+              <h1 className="text-3xl font-medium text-[#233F31] mb-1 font-heading">{title}</h1>
               <SellerBadge sellerId={product?.sellerId} size="md" />
               {condition && (
                 <div className="mt-3 w-fit max-w-full">
@@ -588,17 +588,17 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                     onBlur={() => setIsConditionTooltipVisible(false)}
                     onClick={() => setIsConditionTooltipVisible((current) => !current)}
                   >
-                    <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors group-hover:border-[#003087]/30 group-hover:bg-[#003087]/5 group-focus-within:border-[#003087]/30 group-focus-within:bg-[#003087]/5">
+                    <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#233F31]/15 bg-white px-3 py-1 text-sm font-medium text-[#233F31] transition-colors group-hover:border-[#789676] group-hover:bg-[#FAF6EB]/50 group-focus-within:border-[#789676]">
                       <span className="truncate">{getConditionDisplayLabel(condition)}</span>
-                      <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
+                      <Info className="h-4 w-4 flex-shrink-0 text-[#789676] transition-colors group-hover:text-[#233F31] group-focus-within:text-[#233F31]" />
                     </div>
                     {getConditionTooltip(condition) && isConditionTooltipVisible && (
                       <div
-                        className="pointer-events-none z-[70] w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#0a3075]/10 bg-[#0a3075] px-3 py-2 text-xs leading-5 text-[#F0F6FF] shadow-xl"
+                        className="pointer-events-none z-[70] w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#233F31]/10 bg-[#233F31] px-3 py-2 text-xs leading-5 text-[#FAF6EB] shadow-xl"
                         style={conditionTooltipStyle}
                       >
                         {getConditionTooltip(condition)}
-                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#0a3075] md:bottom-auto md:left-[-8px] md:right-auto md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-r-[#0a3075] md:border-l-transparent"></div>
+                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#233F31] md:bottom-auto md:left-[-8px] md:right-auto md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-r-[#233F31] md:border-l-transparent"></div>
                       </div>
                     )}
                   </div>
@@ -612,7 +612,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                 </div>
               )}
               <div className="mt-4 flex flex-wrap items-baseline gap-3">
-                <span className="text-4xl font-bold text-[#262626]">
+                <span className="text-4xl font-bold text-[#233F31]">
                   {formatMarketPrice(price, getMarket(product?.meta?.targetMarket))}
                 </span>
                 {original_price && original_price > price && (
@@ -620,7 +620,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                     <span className="text-xl text-gray-400 line-through font-medium">
                       {formatMarketPrice(original_price, getMarket(product?.meta?.targetMarket))}
                     </span>
-                    <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
+                    <span className="inline-flex items-center rounded-full bg-[#789676]/20 px-2.5 py-0.5 text-xs font-bold text-[#233F31] border border-[#789676]/40">
                       {Math.round((1 - price / original_price) * 100)}% OFF
                     </span>
                   </>
@@ -629,19 +629,19 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
 
               <ClientOnly>
                 {viewedCount !== null && viewedCount > 0 && (
-                  <div className="mt-6 bg-[#0a3075]/10 border border-[#0a3075]/30 rounded-xl p-3 sm:p-4">
+                  <div className="mt-6 bg-[#FAF6EB] border border-[#789676]/30 rounded-xl p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 sm:space-x-4">
-                        <div className="flex items-center text-[#0a3075]">
-                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                        <div className="flex items-center text-[#233F31]">
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-[#789676]" />
                           <span className="text-xs sm:text-sm font-medium">
                             {viewedCount.toLocaleString()} viewed in the last 24 hours
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center">
-                        <div className="w-2 h-2 bg-[#0a3075] rounded-full animate-pulse mr-2"></div>
-                        <span className="text-xs text-[#0a3075] font-medium hidden sm:inline">Live activity</span>
+                        <div className="w-2 h-2 bg-[#789676] rounded-full animate-pulse mr-2"></div>
+                        <span className="text-xs text-[#233F31] font-medium hidden sm:inline">Live activity</span>
                       </div>
                     </div>
                   </div>
@@ -652,8 +652,8 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
               {!!(product?.meta?.has_mens_sizes || product?.meta?.has_womens_sizes || product?.meta?.hasSizes) && (
                 <div ref={sizeSelectorRef} className="mt-6 border-t border-gray-100 pt-6">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-bold text-[#262626] uppercase tracking-wide flex items-center gap-1.5">
-                      <Ruler className="h-4 w-4 text-gray-500" /> Select Size <span className="text-red-500 font-bold">*</span>
+                    <label className="text-sm font-bold text-[#233F31] uppercase tracking-wide flex items-center gap-1.5 font-heading">
+                      <Ruler className="h-4 w-4 text-[#789676]" /> Select Size <span className="text-red-500 font-bold">*</span>
                     </label>
                   </div>
 
@@ -668,7 +668,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           setSizeError(false);
                         }}
                         className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-200 ${
-                          selectedSizeRange === 'mens' ? 'bg-[#090A28] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                          selectedSizeRange === 'mens' ? 'bg-[#233F31] text-[#FAF6EB] shadow-sm' : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
                         Men&apos;s Sizing
@@ -681,7 +681,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           setSizeError(false);
                         }}
                         className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-200 ${
-                          selectedSizeRange === 'womens' ? 'bg-[#090A28] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                          selectedSizeRange === 'womens' ? 'bg-[#233F31] text-[#FAF6EB] shadow-sm' : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
                         Women&apos;s Sizing
@@ -700,10 +700,10 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         }}
                         className={`py-3 px-2 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                           selectedSize === size
-                            ? 'bg-[#090A28] border-[#090A28] text-white shadow-md transform scale-[1.02]'
+                            ? 'bg-[#233F31] border-[#233F31] text-[#FAF6EB] shadow-md transform scale-[1.02]'
                             : sizeError
                             ? 'bg-red-50 border-red-200 text-red-700 hover:border-red-300'
-                            : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-[#789676] hover:bg-[#FAF6EB]/30'
                         }`}
                       >
                         {size}
@@ -730,17 +730,17 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       {/* Share Button - Mobile Only */}
                       <button
                         onClick={handleShare}
-                        className="lg:hidden flex-shrink-0 w-14 h-14 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors duration-200 group"
-                        style={{ color: '#6b7280' }}
+                        className="lg:hidden flex-shrink-0 w-14 h-14 bg-gray-100 hover:bg-[#FAF6EB] rounded-xl flex items-center justify-center transition-colors duration-200 group border border-transparent hover:border-[#789676]/30"
+                        style={{ color: '#233F31' }}
                         aria-label="Share product"
                       >
-                        <svg className="h-6 w-6 group-hover:opacity-80 transition-opacity" fill="currentColor" fillRule="nonzero" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-6 w-6 group-hover:opacity-80 transition-opacity text-[#233F31]" fill="currentColor" fillRule="nonzero" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                           <path d="M4.86197 3.52794L7.52828 0.861631L7.53151 0.858423C7.59476 0.795922 7.6674 0.748648 7.74485 0.716601C7.82346 0.684006 7.90965 0.666016 8.00004 0.666016C8.18414 0.666016 8.3508 0.740635 8.47145 0.861278L11.1381 3.52794C11.3985 3.78829 11.3985 4.2104 11.1381 4.47075C10.8778 4.7311 10.4557 4.7311 10.1953 4.47075L8.66671 2.94216V10.666C8.66671 11.0342 8.36823 11.3327 8.00004 11.3327C7.63185 11.3327 7.33337 11.0342 7.33337 10.666V2.94216L5.80478 4.47075C5.54443 4.7311 5.12232 4.7311 4.86197 4.47075C4.60162 4.2104 4.60162 3.78829 4.86197 3.52794Z"></path>
                           <path d="M13.3334 14.666V7.33268H11.3334C10.9652 7.33268 10.6667 7.0342 10.6667 6.66602C10.6667 6.29783 10.9652 5.99935 11.3334 5.99935H14C14.3682 5.99935 14.6667 6.29783 14.6667 6.66602V15.3327C14.6667 15.7009 14.3682 15.9993 14 15.9993H2.00004C1.63185 15.9993 1.33337 15.7009 1.33337 15.3327V6.66602C1.33337 6.29783 1.63185 5.99935 2.00004 5.99935H4.66671C5.0349 5.99935 5.33337 6.29783 5.33337 6.66602C5.33337 7.0342 5.0349 7.33268 4.66671 7.33268H2.66671V14.666H13.3334Z"></path>
                         </svg>
                       </button>
-                      <button onClick={handleAddToCart} disabled={isAddingToCart || isBuyingNow} className="flex-1 lg:w-full bg-[#0a3075] hover:bg-[#0a0f32] text-[#F0F6FF] py-3 lg:py-4 px-6 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm lg:text-base">
-                        {isAddingToCart ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#F0F6FF] mr-2"></div>Adding to Cart...</> : <><ShoppingCart className="h-5 w-5 mr-2" />Add to Cart</>}
+                      <button onClick={handleAddToCart} disabled={isAddingToCart || isBuyingNow} className="flex-1 lg:w-full bg-[#233F31] hover:bg-[#1a3025] text-[#FAF6EB] py-3.5 lg:py-4 px-6 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm lg:text-base">
+                        {isAddingToCart ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#FAF6EB] mr-2"></div>Adding to Cart...</> : <><ShoppingCart className="h-5 w-5 mr-2 text-[#789676]" />Add to Cart</>}
                       </button>
                     </div>
                     {(product.checkoutFlow === 'paypal-invoice' || product.checkoutFlow === 'paypal-unclaimed' || product.checkoutFlow === 'paypal-direct' || product.checkoutFlow === 'paypal-api') ? (
@@ -748,12 +748,12 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         <button
                           onClick={handleBuyNow}
                           disabled={isAddingToCart || isBuyingNow}
-                          className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-95 active:scale-[0.98]"
+                          className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-95 active:scale-[0.98] shadow-sm hover:shadow-md"
                           style={{ backgroundColor: '#EFC154' }}
                           aria-label="Checkout with PayPal"
                         >
                           {isBuyingNow ? (
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#003087]" />
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#233F31]" />
                           ) : (
                             <Image
                               src="/PayPal-checkout.png"
@@ -764,8 +764,8 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                             />
                           )}
                         </button>
-                        <p className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 font-medium tracking-wide">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <p className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 font-medium tracking-wide">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-[#789676] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
                           </svg>
                           {(product.checkoutFlow === 'paypal-invoice' || product.checkoutFlow === 'paypal-unclaimed')
@@ -778,16 +778,16 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       <button
                         onClick={handleBuyNow}
                         disabled={isAddingToCart || isBuyingNow}
-                        className="hidden lg:flex w-full bg-transparent border-2 border-[#0a3075] hover:border-[#0a0f32] text-[#0a3075] hover:text-[#0a0f32] py-4 px-6 rounded-xl font-semibold transition-colors duration-200 items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="hidden lg:flex w-full bg-transparent border-2 border-[#233F31] hover:bg-[#233F31] text-[#233F31] hover:text-[#FAF6EB] py-4 px-6 rounded-xl font-bold transition-all duration-200 items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                       >
                         {isBuyingNow ? (
                           <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#0a3075] mr-2"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#233F31] mr-2"></div>
                             Processing...
                           </>
                         ) : (
                           <>
-                            <Zap className="h-5 w-5 mr-2" />
+                            <Zap className="h-5 w-5 mr-2 text-[#789676]" />
                             Buy Now
                           </>
                         )}
@@ -810,7 +810,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                     <button
                       type="button"
                       onClick={() => setShowFullDescription((current) => !current)}
-                      className="mt-4 text-sm font-semibold text-[#0a3075] transition hover:text-[#00297F]"
+                      className="mt-4 text-sm font-semibold text-[#233F31] hover:text-[#789676] transition-colors font-medium"
                     >
                       {showFullDescription ? "Show less" : "Show more"}
                     </button>
@@ -821,8 +821,8 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
           </div>
 
           <div className="mt-12 hidden lg:block">
-            <section className="rounded-[24px] border border-[#DCE5F5] bg-white px-8 py-8">
-              <h2 className="text-2xl font-semibold text-[#262626]">Item Description from the Seller</h2>
+            <section className="rounded-[24px] border border-[#233F31]/10 bg-white px-8 py-8 shadow-sm">
+              <h2 className="text-2xl font-semibold text-[#233F31] font-heading">Item Description from the Seller</h2>
               <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-[#5B6785]">
                 {showFullDescription ? descriptionText : descriptionPreview}
               </p>
@@ -830,7 +830,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                 <button
                   type="button"
                   onClick={() => setShowFullDescription((current) => !current)}
-                  className="mt-5 text-sm font-semibold text-[#0a3075] transition hover:text-[#00297F]"
+                  className="mt-5 text-sm font-semibold text-[#233F31] hover:text-[#789676] transition-colors font-medium"
                 >
                   {showFullDescription ? "Show less" : "Show more"}
                 </button>
@@ -840,9 +840,9 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
 
           {/* FAQ Section - Full Width */}
           <div className="mt-16 w-full">
-            <section className="rounded-[24px] border border-[#DCE5F5] bg-white">
+            <section className="rounded-[24px] border border-[#233F31]/10 bg-white shadow-sm">
               <div className="border-b border-[#E8EEF8] px-6 py-6 sm:px-8">
-                <h2 className="text-2xl font-semibold text-[#262626]">Frequently Asked Questions</h2>
+                <h2 className="text-2xl font-semibold text-[#233F31] font-heading">Frequently Asked Questions</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-7 text-[#5B6785]">
                   Quick answers to the things shoppers usually want to know before placing an order.
                 </p>
@@ -863,14 +863,14 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         className="flex w-full items-start justify-between gap-4 text-left"
                       >
                         <div className="pr-2">
-                          <h3 className="text-base font-medium text-[#262626] sm:text-lg">{item.question}</h3>
+                          <h3 className="text-base font-medium text-[#233F31] sm:text-lg">{item.question}</h3>
                           {!isOpen && (
                             <p className="mt-2 line-clamp-1 text-sm text-[#6B7280]">
                               {item.answer}
                             </p>
                           )}
                         </div>
-                        <span className="mt-0.5 flex-shrink-0 text-[#0a3075]" aria-hidden="true">
+                        <span className="mt-0.5 flex-shrink-0 text-[#789676]" aria-hidden="true">
                           {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                         </span>
                       </button>
@@ -880,7 +880,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           {item.linkHref && item.linkLabel && (
                             <Link
                               href={item.linkHref}
-                              className="mt-2 inline-flex text-sm font-semibold text-[#0a3075] transition hover:text-[#00297F]"
+                              className="mt-2 inline-flex text-sm font-semibold text-[#233F31] hover:text-[#789676] transition-colors"
                             >
                               {item.linkLabel}
                             </Link>
@@ -902,7 +902,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           setOpenFaqIndex(-1);
                         }
                       }}
-                    className="text-sm font-semibold text-[#0a3075] transition hover:text-[#00297F]"
+                    className="text-sm font-semibold text-[#233F31] hover:text-[#789676] transition-colors"
                   >
                     {showAllFaqs ? "Show fewer answers" : "View more answers"}
                   </button>
@@ -932,10 +932,10 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
       {showZoom && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50" onClick={() => setShowZoom(false)}>
           <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-            <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }} className="p-2 text-white hover:text-[#F0F6FF] transition-colors duration-200" aria-label="Zoom out"><span className="text-2xl">−</span></button>
-            <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }} className="p-2 text-white hover:text-[#F0F6FF] transition-colors duration-200" aria-label="Zoom in"><span className="text-2xl">+</span></button>
-            <button onClick={(e) => { e.stopPropagation(); resetZoom(); }} className="p-2 text-white hover:text-[#F0F6FF] transition-colors duration-200" aria-label="Reset zoom"><span className="text-lg">⟲</span></button>
-            <button onClick={(e) => { e.stopPropagation(); setShowZoom(false); }} className="p-2 text-white hover:text-[#F0F6FF] transition-colors duration-200" aria-label="Close zoom view"><X className="h-8 w-8" /></button>
+            <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }} className="p-2 text-white hover:text-[#FAF6EB] transition-colors duration-200" aria-label="Zoom out"><span className="text-2xl">−</span></button>
+            <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }} className="p-2 text-white hover:text-[#FAF6EB] transition-colors duration-200" aria-label="Zoom in"><span className="text-2xl">+</span></button>
+            <button onClick={(e) => { e.stopPropagation(); resetZoom(); }} className="p-2 text-white hover:text-[#FAF6EB] transition-colors duration-200" aria-label="Reset zoom"><span className="text-lg">⟲</span></button>
+            <button onClick={(e) => { e.stopPropagation(); setShowZoom(false); }} className="p-2 text-white hover:text-[#FAF6EB] transition-colors duration-200" aria-label="Close zoom view"><X className="h-8 w-8" /></button>
           </div>
           <div className="absolute inset-0 flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
             <div className="relative w-full h-full">
@@ -954,8 +954,8 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
               />
               {images.length > 1 && (
                 <>
-                  <button onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1)); setZoomLevel(1); }} className="absolute left-4 top-1/2 -translate-y-1/2 transform bg-white/10 hover:bg-[#0a3075] p-3 rounded-full text-white transition-colors duration-200" aria-label="Previous image"><ChevronLeft className="h-8 w-8" /></button>
-                  <button onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0)); setZoomLevel(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 transform bg-white/10 hover:bg-[#0a3075] p-3 rounded-full text-white transition-colors duration-200" aria-label="Next image"><ChevronRight className="h-8 w-8" /></button>
+                  <button onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1)); setZoomLevel(1); }} className="absolute left-4 top-1/2 -translate-y-1/2 transform bg-white/10 hover:bg-[#233F31] p-3 rounded-full text-white transition-colors duration-200" aria-label="Previous image"><ChevronLeft className="h-8 w-8" /></button>
+                  <button onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0)); setZoomLevel(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 transform bg-white/10 hover:bg-[#233F31] p-3 rounded-full text-white transition-colors duration-200" aria-label="Next image"><ChevronRight className="h-8 w-8" /></button>
                 </>
               )}
             </div>
