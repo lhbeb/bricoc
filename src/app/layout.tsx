@@ -59,6 +59,14 @@ export const metadata: Metadata = {
     description: "Shop premium electric golf carts, luxury 4-passenger and 6-passenger models, and accessories at Bricoc.",
     images: ["/bg.png"],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: '/favicon.png',
+    shortcut: '/favicon.png',
+  },
   robots: {
     index: true,
     follow: true,
