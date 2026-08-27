@@ -261,16 +261,11 @@ export default function ReturnPolicyPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 font-bold text-[#233F31]">
                   <Building2 className="w-5 h-5 text-[#233F31]" />
-                  <span>Our Addresses</span>
+                  <span>Business Address</span>
                 </div>
                 <div className="text-sm text-gray-600 pl-7 space-y-2">
                   <div>
-                    <strong className="text-gray-900 block">UK Registered Office:</strong>
-                    Choats Rd, Barking, Dagenham RM9 6BF, United Kingdom
-                  </div>
-                  <div>
-                    <strong className="text-gray-900 block">US Dispatch Center:</strong>
-                    305 Greif Pkwy, Delaware, OH 43015, United States
+                    1731 Matthews Ave APT 4A, Bronx, New York 10462, United States
                   </div>
                 </div>
               </div>

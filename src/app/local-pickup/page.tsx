@@ -32,7 +32,7 @@ export default function LocalPickupPage() {
               Pick up your Bricoc order with confidence
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-[#D9E6FF] sm:text-base">
-              Eligible outdoor power equipment and garden products can be collected from our location in Delaware, Ohio. This page covers what to expect, what to bring, and how collection works once your order is ready.
+              Eligible golf equipment and products can be collected from our location in Bronx, New York. This page covers what to expect, what to bring, and how collection works once your order is ready.
             </p>
           </section>
 
@@ -103,9 +103,9 @@ export default function LocalPickupPage() {
                     <div className="mt-4 space-y-4 text-sm leading-7 text-[#5B6785]">
                       <address className="not-italic">
                         <span className="block font-semibold text-[#262626]">United States</span>
-                        305 Greif Pkwy
+                        1731 Matthews Ave APT 4A
                         <br />
-                        Delaware, OH 43015
+                        Bronx, New York 10462
                         <br />
                         United States
                       </address>

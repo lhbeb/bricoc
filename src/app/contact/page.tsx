@@ -41,28 +41,18 @@ export default function ContactPage() {
             '@type': 'ContactPoint',
             'telephone': '+19129231747',
             'contactType': 'customer service',
-            'areaServed': ['US', 'GB'],
+            'areaServed': ['US'],
             'availableLanguage': ['en'],
           },
         ],
-        'address': [
-          {
-            '@type': 'PostalAddress',
-            'streetAddress': 'Choats Rd',
-            'addressLocality': 'Barking',
-            'addressRegion': 'Dagenham',
-            'postalCode': 'RM9 6BF',
-            'addressCountry': 'GB',
-          },
-          {
-            '@type': 'PostalAddress',
-            'streetAddress': '305 Greif Pkwy',
-            'addressLocality': 'Delaware',
-            'addressRegion': 'OH',
-            'postalCode': '43015',
-            'addressCountry': 'US',
-          },
-        ],
+        'address': {
+          '@type': 'PostalAddress',
+          'streetAddress': '1731 Matthews Ave APT 4A',
+          'addressLocality': 'Bronx',
+          'addressRegion': 'NY',
+          'postalCode': '10462',
+          'addressCountry': 'US',
+        },
       },
     ],
   };
@@ -220,17 +210,10 @@ export default function ContactPage() {
                   <h2 className="text-xl font-bold text-[#233F31] mb-6 font-heading">Get in Touch</h2>
                   <div className="space-y-6 text-sm">
                     <div className="flex items-start">
-                      <Building2 className="h-5 w-5 text-[#789676] mt-1 shrink-0" />
-                      <div className="ml-3">
-                        <h3 className="font-semibold text-[#233F31]">UK Registered Office</h3>
-                        <p className="text-gray-600 mt-0.5">Choats Rd, Barking, Dagenham RM9 6BF, United Kingdom</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
                       <MapPin className="h-5 w-5 text-[#789676] mt-1 shrink-0" />
                       <div className="ml-3">
-                        <h3 className="font-semibold text-[#233F31]">US Showroom & Dispatch</h3>
-                        <p className="text-gray-600 mt-0.5">305 Greif Pkwy, Delaware, OH 43015, United States</p>
+                        <h3 className="font-semibold text-[#233F31]">Business Address</h3>
+                        <p className="text-gray-600 mt-0.5">1731 Matthews Ave APT 4A, Bronx, New York 10462, United States</p>
                       </div>
                     </div>
                     <div className="flex items-start">

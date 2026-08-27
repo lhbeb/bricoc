@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
   <channel>
     <title>Bricoc Google Merchant Center Feed${targetLabel}${currencyLabel}</title>
     <link>${BASE_URL}</link>
-    <description>Selected Bricoc products for ${country || 'United Kingdom and United States'}${currencyLabel}</description>
+    <description>Selected Bricoc products for ${country || 'United States'}${currencyLabel}</description>
     ${itemsXml}
   </channel>
 </rss>`;

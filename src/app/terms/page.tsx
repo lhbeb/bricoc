@@ -115,13 +115,12 @@ const TermsPage = () => {
           <div>
             <h2 className="text-3xl font-bold text-[#262626] mt-10 mb-4">6. Shipping Policy</h2>
             <p className="mb-4">
-              Free standard shipping applies to all orders within the United States and United Kingdom.
+              Free standard shipping applies to all orders across the United States.
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Same-day shipping is available for orders placed before 2:00 PM EST.</li>
               <li>Standard processing time is 0 to 1 business day.</li>
               <li>Domestic USA delivery time is 5 to 9 business days.</li>
-              <li>United Kingdom delivery time is 5 to 9 business days.</li>
               <li>All orders qualify for free standard shipping with no minimum spend required.</li>
               <li>Tracking information is sent to the customer via email once the order ships.</li>
             </ul>
@@ -203,12 +202,8 @@ const TermsPage = () => {
                 <div className="text-gray-600">contact@bricoc.com</div>
               </div>
               <div>
-                <div className="font-medium text-[#262626] mb-1">UK Registered Office:</div>
-                <div className="text-gray-600">Choats Rd, Barking, Dagenham RM9 6BF, United Kingdom</div>
-              </div>
-              <div>
-                <div className="font-medium text-[#262626] mb-1">US Dispatch Center:</div>
-                <div className="text-gray-600">305 Greif Pkwy, Delaware, OH 43015, United States</div>
+                <div className="font-medium text-[#262626] mb-1">Business Address:</div>
+                <div className="text-gray-600">1731 Matthews Ave APT 4A, Bronx, New York 10462, United States</div>
               </div>
               <div>
                 <div className="font-medium text-[#262626] mb-1">Hours:</div>

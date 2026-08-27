@@ -37,7 +37,7 @@ export default function AboutPage() {
         'url': 'https://bricoc.com/about',
         'name': 'About Bricoc',
         'description':
-          'Bricoc is a premier manufacturer and retailer of high-performance electric and luxury golf carts serving customers across the United States and United Kingdom.',
+          'Bricoc is a premier manufacturer and retailer of high-performance electric and luxury golf carts serving customers across the United States.',
         'mainEntity': {
           '@id': 'https://bricoc.com/#organization',
         },
@@ -51,30 +51,20 @@ export default function AboutPage() {
           'Official brand and store for Bricoc electric golf carts, 4-passenger and 6-passenger vehicles, and parts.',
         'email': 'contact@bricoc.com',
         'telephone': ['+19129231747'],
-        'address': [
-          {
-            '@type': 'PostalAddress',
-            'streetAddress': 'Choats Rd',
-            'addressLocality': 'Barking',
-            'addressRegion': 'Dagenham',
-            'postalCode': 'RM9 6BF',
-            'addressCountry': 'GB',
-          },
-          {
-            '@type': 'PostalAddress',
-            'streetAddress': '305 Greif Pkwy',
-            'addressLocality': 'Delaware',
-            'addressRegion': 'OH',
-            'postalCode': '43015',
-            'addressCountry': 'US',
-          },
-        ],
+        'address': {
+          '@type': 'PostalAddress',
+          'streetAddress': '1731 Matthews Ave APT 4A',
+          'addressLocality': 'Bronx',
+          'addressRegion': 'NY',
+          'postalCode': '10462',
+          'addressCountry': 'US',
+        },
         'contactPoint': [
           {
             '@type': 'ContactPoint',
             'telephone': '+19129231747',
             'contactType': 'customer service',
-            'areaServed': ['GB', 'US'],
+            'areaServed': ['US'],
             'availableLanguage': ['en'],
           },
         ],
@@ -117,7 +107,7 @@ export default function AboutPage() {
             </div>
             <div className="space-y-4 text-base leading-7 text-gray-700">
               <p>
-                Bricoc operates assembly, inspection, and dispatch facilities out of Delaware, Ohio, delivering golf carts directly to customers nationwide.
+                Bricoc operates assembly, inspection, and dispatch facilities delivering golf carts and premium golf equipment directly to customers nationwide across the United States.
               </p>
               <p>
                 Every vehicle undergoes a rigorous 40-point safety and electrical inspection prior to enclosed carrier transport to ensure turnkey readiness on arrival.
@@ -246,20 +236,13 @@ export default function AboutPage() {
             </div>
             <h3 className="text-2xl font-bold text-[#233F31] font-heading">Contact Information</h3>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 text-sm">
+          <div className="grid md:grid-cols-3 gap-6 text-sm">
             <div className="bg-[#FAF6EB]/50 rounded-xl p-6 border border-[#789676]/20">
               <div className="flex items-center gap-3 mb-2">
                 <MapPin className="h-5 w-5 text-[#233F31]" />
-                <div className="font-bold text-[#233F31]">UK Registered Office</div>
+                <div className="font-bold text-[#233F31]">Business Address</div>
               </div>
-              <div className="text-gray-600 ml-8">Choats Rd, Barking, Dagenham RM9 6BF, United Kingdom</div>
-            </div>
-            <div className="bg-[#FAF6EB]/50 rounded-xl p-6 border border-[#789676]/20">
-              <div className="flex items-center gap-3 mb-2">
-                <MapPin className="h-5 w-5 text-[#233F31]" />
-                <div className="font-bold text-[#233F31]">US Showroom & Dispatch</div>
-              </div>
-              <div className="text-gray-600 ml-8">305 Greif Pkwy, Delaware, OH 43015, United States</div>
+              <div className="text-gray-600 ml-8">1731 Matthews Ave APT 4A, Bronx, New York 10462, United States</div>
             </div>
             <div className="bg-[#FAF6EB]/50 rounded-xl p-6 border border-[#789676]/20">
               <div className="flex items-center gap-3 mb-2">
