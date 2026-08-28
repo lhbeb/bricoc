@@ -57,7 +57,7 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://www.instagram.com/bricoc_officiel/"
+                  href="https://www.instagram.com/bricocofficial/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={socialIconClass}

@@ -26,7 +26,7 @@ const InstagramSection: React.FC = () => {
 
                 {/* Profile Details */}
                 <div className="flex-grow">
-                  <h3 className="font-bold text-[#233F31] text-lg sm:text-xl mb-0.5">@bricoc_officiel</h3>
+                  <h3 className="font-bold text-[#233F31] text-lg sm:text-xl mb-0.5">@bricocofficial</h3>
                   <p className="text-gray-600 text-sm sm:text-base mb-2">Bricoc Golf Carts</p>
 
                   {/* Statistics */}
@@ -50,7 +50,7 @@ const InstagramSection: React.FC = () => {
               {/* Follow Us Button */}
               <div className="flex-shrink-0">
                 <a
-                  href="https://www.instagram.com/bricoc_officiel/"
+                  href="https://www.instagram.com/bricocofficial/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center px-6 py-3 bg-[#233F31] hover:bg-[#1a3025] text-[#FAF6EB] font-medium rounded-full transition-all duration-200 shadow-sm hover:shadow-md"

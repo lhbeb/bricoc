@@ -136,7 +136,7 @@ export default function RootLayout({
                 "description": "Bricoc - Premium Electric & Luxury Golf Carts. Discover reliable electric, 4-seater, 6-seater, and custom golf carts.",
                 "sameAs": [
                   "https://www.tiktok.com/@bricoc_officiel",
-                  "https://www.instagram.com/bricoc_officiel/",
+                  "https://www.instagram.com/bricocofficial/",
                   "https://www.pinterest.com/bricoc_officiel/"
                 ],
                 "contactPoint": {
