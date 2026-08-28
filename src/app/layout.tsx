@@ -96,6 +96,8 @@ export default function RootLayout({
         {/* Google Merchant Center Domain Claim Verification */}
         <meta name="google-site-verification" content="o8gC6haURQ1t7L9G8xfh_-5imCYNPmnhjnt2IrgEPco" />
         <meta name="google-site-verification" content="whWwvqC20XmxK8qOhFgMP6wWGrqw2QYp-W-OSxNmlW8" />
+        {/* Pinterest Domain Verification */}
+        <meta name="p:domain_verify" content="1005fd41bbe483406bb3d79510b3e9ed" />
         {/* Meta Pixel base snippet */}
         <script
           dangerouslySetInnerHTML={{
@@ -137,7 +139,7 @@ export default function RootLayout({
                 "sameAs": [
                   "https://www.tiktok.com/@bricoc_officiel",
                   "https://www.instagram.com/bricocofficial/",
-                  "https://www.pinterest.com/bricoc_officiel/"
+                  "https://www.pinterest.com/Bricoc_official/_pins/"
                 ],
                 "contactPoint": {
                   "@type": "ContactPoint",

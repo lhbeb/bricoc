@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Instagram } from 'lucide-react';
+import { Mail, MessageSquare, MapPin, Instagram } from 'lucide-react';
 
 const socialIconClass =
   'inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#789676]/60 text-[#FAF6EB] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#789676] hover:bg-[#789676] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#233F31]';
@@ -26,10 +26,8 @@ const Footer = () => {
             </p>
             <div className="space-y-2.5 text-sm">
               <div className="flex items-center">
-                <Phone className="h-4.5 w-4.5 shrink-0 text-[#789676] mr-2" />
-                <a href="tel:+19129231747" className="hover:text-white hover:underline transition-colors duration-200">
-                  <span className="font-semibold text-white">United States:</span> +19129231747
-                </a>
+                <MessageSquare className="h-4.5 w-4.5 shrink-0 text-[#789676] mr-2" />
+                <span className="text-[#FAF6EB]/90 font-medium">24/7 Live Chat Support Available</span>
               </div>
               <div className="flex items-center">
                 <Mail className="h-4.5 w-4.5 text-[#789676] mr-2" />
@@ -66,7 +64,7 @@ const Footer = () => {
                   <Instagram className="h-4 w-4" />
                 </a>
                 <a
-                  href="https://www.pinterest.com/bricoc_officiel/"
+                  href="https://www.pinterest.com/Bricoc_official/_pins/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={socialIconClass}
