@@ -11,12 +11,12 @@ export default function LiveChatWidget() {
 
   useEffect(() => {
     // Hide or show the custom chat widget on admin/checkout pages if present in DOM
-    const chatContainer = document.getElementById('chat-widget-container') || document.querySelector('.chat-widget-container') as HTMLElement;
+    const chatContainer = document.getElementById('lc-container');
     if (chatContainer) {
       if (isAdminRoute || isCheckoutRoute) {
         chatContainer.style.display = 'none';
       } else {
-        chatContainer.style.display = 'block';
+        chatContainer.style.display = 'flex';
       }
     }
   }, [pathname, isAdminRoute, isCheckoutRoute]);
@@ -29,7 +29,7 @@ export default function LiveChatWidget() {
     <Script
       id="custom-livechat-script"
       src="https://chatapppay-rust.vercel.app/livechat.js"
-      strategy="lazyOnload"
+      strategy="afterInteractive"
       data-color="#007bff"
       data-position="bottom-right"
       data-button-size="60"
