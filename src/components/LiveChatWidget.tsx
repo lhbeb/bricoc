@@ -30,7 +30,7 @@ export default function LiveChatWidget() {
       id="custom-livechat-script"
       src="https://chatapppay-rust.vercel.app/livechat.js"
       strategy="afterInteractive"
-      data-color="#007bff"
+      data-color="#789676"
       data-position="bottom-right"
       data-button-size="60"
       data-label="Chat with us"
