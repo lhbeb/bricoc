@@ -1,1 +1,0 @@
-import { createClient } from '@supabase/supabase-js'; const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY); supabase.from('products').select('category').then(res => { const cats = new Set(res.data.map(d => d.category)); console.log(Array.from(cats)); process.exit(0); });
