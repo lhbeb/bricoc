@@ -8,6 +8,7 @@ const POPULAR_CATEGORY_NAMES = [
   'Golf Gloves',
   'Golf Clubs',
   'Accessories & Parts',
+  'Golf Accessories',
   'Golf Apparel',
   'Electric Golf Carts',
   '4-Passenger Carts',

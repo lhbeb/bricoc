@@ -10,12 +10,8 @@ import ClientOnly from './ClientOnly';
 import SearchBar from './SearchBar';
 
 const catalogNavigation = [
-  { label: 'Golf Carts', href: '/search?category=Golf%20Carts' },
   { label: 'Golf Bags', href: '/search?category=Golf%20Bags' },
-  { label: 'Golf Gloves', href: '/search?category=Golf%20Gloves' },
-  { label: 'Clubs & Putters', href: '/search?category=Golf%20Clubs' },
-  { label: 'Accessories & Parts', href: '/search?category=Accessories' },
-  { label: 'Apparel', href: '/search?category=Apparel' },
+  { label: 'Golf Accessories', href: '/search?category=Golf%20Accessories' },
   { label: 'Featured', href: '/#featured' },
   { label: 'Track Order', href: '/track' },
   { label: 'FAQs', href: '/frequently-asked-questions' },
