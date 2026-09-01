@@ -17,11 +17,9 @@ export default async function HomePage() {
       getProducts(),
     ]);
 
-    const electricGolfCarts = products.filter(p =>
-      p.category?.toLowerCase().includes('electric') ||
-      p.category?.toLowerCase().includes('cart') ||
-      p.title?.toLowerCase().includes('cart') ||
-      p.collections?.includes('lawn-garden')
+    const golfBags = products.filter(p =>
+      p.category?.toLowerCase().includes('bag') ||
+      p.title?.toLowerCase().includes('bag')
     );
 
     const accessoriesAndParts = products.filter((product) =>
@@ -50,19 +48,19 @@ export default async function HomePage() {
 
       <SameDayShipping />
 
-      {electricGolfCarts.length > 0 && (
+      {golfBags.length > 0 && (
         <Suspense fallback={null}>
           <ProductGrid
-            products={electricGolfCarts}
-            sectionId="bricoc-golf-carts"
-            title="Premium Bricoc Golf Carts"
+            products={golfBags}
+            sectionId="bricoc-golf-bags"
+            title="Premium Bricoc Golf Bags"
             editorialCard={{
-              title: 'Master Every Fairway and Neighborhood',
+              title: 'Master Every Fairway',
               description:
-                'Bricoc golf carts combine whisper-quiet lithium power, superior comfort seating, and long-range battery performance. Experience smooth acceleration and street-legal capability built to outlast.',
+                'Bricoc golf bags combine lightweight durability, superior club organization, and premium materials. Experience effortless carrying and smart storage designed for the modern golfer.',
             }}
             randomizeForVisitor
-            visitorShuffleKey="home-electric-carts"
+            visitorShuffleKey="home-golf-bags"
           />
         </Suspense>
       )}
