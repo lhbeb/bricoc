@@ -178,7 +178,7 @@ const TrackPage = () => {
                   <button
                     type="submit"
                     disabled={!isScriptReady || isSubmitting}
-                    className="inline-flex h-14 items-center justify-center rounded-2xl bg-[#f5970c] px-6 text-sm font-semibold text-[#0a3075] transition hover:bg-[#FFF7A0] disabled:cursor-not-allowed disabled:bg-[#D7DEF0] disabled:text-[#6E7AA1]"
+                    className="inline-flex h-14 items-center justify-center rounded-2xl bg-[#233F31] px-6 text-sm font-semibold text-[#FAF6EB] transition hover:bg-[#1a3025] disabled:cursor-not-allowed disabled:bg-[#D7DEF0] disabled:text-[#6E7AA1]"
                   >
                     {isSubmitting ? "Loading..." : "Track Order"}
                   </button>
