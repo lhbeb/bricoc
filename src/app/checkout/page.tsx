@@ -136,7 +136,7 @@ const CheckoutPage: React.FC = () => {
       const controller = new AbortController();
       timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const requestShippingData = usesCountryFirstAddress(product.checkoutFlow)
+      const requestShippingData = product.checkoutFlow === 'stripe' || usesCountryFirstAddress(product.checkoutFlow)
         ? shippingData
         : {
             streetAddress: shippingData.streetAddress,

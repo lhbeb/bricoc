@@ -18,6 +18,22 @@ function loadRoute(file, mocks) {
 }
 
 (async () => {
+  // Exercise the actual form-to-order payload, not just Stripe's API handler.
+  const checkoutSource = fs.readFileSync(path.join(__dirname, '../src/app/checkout/page.tsx'), 'utf8');
+  const payloadExpression = checkoutSource.split('const requestShippingData = ')[1].split(';')[0];
+  const enteredAddress = { fullName: 'Test Buyer', streetAddress: '1 Test St', city: 'Boston', state: 'MA', zipCode: '02108', email: 'test@example.com', countryCode: 'US', country: 'United States', addressLine2: 'Unit 2' };
+  const stripePayload = vm.runInNewContext(payloadExpression, {
+    product: { checkoutFlow: 'stripe' }, shippingData: enteredAddress, usesCountryFirstAddress: () => false,
+  });
+  assert.equal(stripePayload.fullName, 'Test Buyer');
+  assert.equal(stripePayload.addressLine2, 'Unit 2');
+  for (const flow of ['buymeacoffee', 'kofi', 'external']) {
+    const payload = vm.runInNewContext(payloadExpression, {
+      product: { checkoutFlow: flow }, shippingData: enteredAddress, usesCountryFirstAddress: () => false,
+    });
+    assert.equal(payload.fullName, undefined);
+    assert.equal(payload.email, enteredAddress.email);
+  }
   let product, order, linked, created, updates, notifications, paymentStatus;
   const reset = () => {
     product = { id: 'product-1', slug: 'mower', title: 'Real mower', price: 100, currency: 'USD', inStock: true, images: [] };
