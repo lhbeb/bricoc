@@ -650,8 +650,12 @@ export default function AdminProductsPage() {
 
       const rows = gmcProducts.map((p: any) => {
         const images: string[] = p.images || [];
-        const mainImage = images[0] || '';
-        const additionalImages = images.slice(1, 10).join(',');
+        const proxiedImages = images.map(img => {
+          const originalImage = new URL(img, domain).toString();
+          return `${domain}/api/image-proxy?url=${encodeURIComponent(originalImage)}`;
+        });
+        const mainImage = proxiedImages[0] || '';
+        const additionalImages = proxiedImages.slice(1, 10).join(',');
         const pSlug = p.slug || p.id;
         const productLink = `${domain}/products/${pSlug}`;
         const isAvailable = p.inStock !== false ? 'in_stock' : 'out_of_stock';

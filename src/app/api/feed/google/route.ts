@@ -114,7 +114,8 @@ export async function GET(request: NextRequest) {
         const condition = mapConditionToGmc(product.condition);
         const brand = escapeXml(product.brand || 'Bricoc');
         const category = escapeXml(product.category || 'Home & Garden');
-        const imageLink = escapeXml(new URL(product.images[0], BASE_URL).toString());
+        const originalImage = new URL(product.images[0], BASE_URL).toString();
+        const imageLink = escapeXml(`${BASE_URL}/api/image-proxy?url=${encodeURIComponent(originalImage)}`);
 
         return `
     <item>

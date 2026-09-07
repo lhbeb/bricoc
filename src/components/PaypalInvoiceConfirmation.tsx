@@ -15,13 +15,17 @@ declare global {
             customerEmail: string;
             orderId: string;
             total: string;
+            color: string;
+            address: string;
+            itemName: string;
         };
         __hfChatScriptPromise?: Promise<void>;
         __hfChatScriptLoaded?: boolean;
     }
 }
 
-const CHAT_WIDGET_SRC = 'https://chatapppay.vercel.app/widget.js';
+const CHAT_URL = 'https://chatapppay-rust.vercel.app';
+const CHAT_WIDGET_SRC = `${CHAT_URL}/widget.js`;
 const CHAT_WIDGET_SCRIPT_ID = 'hf-chat-widget-script';
 
 function clearChatTargets() {
@@ -147,7 +151,6 @@ export default function PaypalInvoiceConfirmation({
         .replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Customer';
 
     const widgetOrderId = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`).current;
-    const lastTargetRef = useRef<string | null>(null);
 
     const address = formatShippingAddressLines(shippingData).join(', ');
 
@@ -187,23 +190,23 @@ export default function PaypalInvoiceConfirmation({
         if (typeof window === 'undefined') return;
 
         const targetId = isMobileViewport ? '#chat-widget-mobile' : '#chat-widget-desktop';
-        const targetChanged = lastTargetRef.current !== null && lastTargetRef.current !== targetId;
-        lastTargetRef.current = targetId;
 
         window.HFChatConfig = {
-            chatUrl: 'https://chatapppay.vercel.app',
+            chatUrl: CHAT_URL,
             target: targetId,
             customerName,
             customerEmail: shippingData.email,
             orderId: widgetOrderId,
             total: orderTotal,
+            color: '#233F31',
+            address,
+            itemName: product.title,
         };
 
-        if (targetChanged) {
-            clearChatTargets();
-        }
-
-        loadChatWidgetScript(targetChanged).catch((error) => {
+        // The embed reads its configuration once, when the script executes.
+        // Recreate it after a remount, viewport switch, or order detail change.
+        clearChatTargets();
+        loadChatWidgetScript(true).catch((error) => {
             console.error('❌ [PayPal Invoice Chat] Widget bootstrap failed:', error);
         });
 
@@ -211,7 +214,7 @@ export default function PaypalInvoiceConfirmation({
             delete window.HFChatConfig;
             clearChatTargets();
         };
-    }, [customerName, shippingData.email, widgetOrderId, orderTotal, isMobileViewport, isUnclaimed]);
+    }, [customerName, shippingData.email, widgetOrderId, orderTotal, address, product.title, isMobileViewport, isUnclaimed]);
 
     const handleProofUpload = async () => {
         if (!proofFile) {
