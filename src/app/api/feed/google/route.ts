@@ -151,7 +151,6 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
         'Cache-Control': 'no-store, max-age=0',
-        'X-Robots-Tag': 'noindex, nofollow',
       },
     });
   } catch (error) {
