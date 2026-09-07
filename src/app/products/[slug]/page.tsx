@@ -149,7 +149,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         },
         "hasMerchantReturnPolicy": {
           "@type": "MerchantReturnPolicy",
-          "applicableCountry": ["GB", "US"],
+          "applicableCountry": ["US"],
           "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
           "merchantReturnDays": 30,
           "returnMethod": "https://schema.org/ReturnByMail",
@@ -159,33 +159,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           "refundType": "https://schema.org/FullRefund"
         },
         "shippingDetails": [
-          {
-            "@type": "OfferShippingDetails",
-            "shippingRate": {
-              "@type": "MonetaryAmount",
-              "value": 0,
-              "currency": "GBP"
-            },
-            "shippingDestination": {
-              "@type": "DefinedRegion",
-              "addressCountry": "GB"
-            },
-            "deliveryTime": {
-              "@type": "ShippingDeliveryTime",
-              "handlingTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 0,
-                "maxValue": 1,
-                "unitCode": "DAY"
-              },
-              "transitTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 5,
-                "maxValue": 9,
-                "unitCode": "DAY"
-              }
-            }
-          },
           {
             "@type": "OfferShippingDetails",
             "shippingRate": {

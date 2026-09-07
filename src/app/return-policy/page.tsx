@@ -32,7 +32,7 @@ export default function ReturnPolicyPage() {
       '@type': 'MerchantReturnPolicy',
       'name': 'Bricoc Return & Exchange Policy',
       'merchantReturnLink': 'https://bricoc.com/return-policy',
-      'applicableCountry': ['GB', 'US'],
+      'applicableCountry': ['US'],
       'returnPolicyCategory': 'https://schema.org/MerchantReturnFiniteReturnWindow',
       'merchantReturnDays': 30,
       'returnMethod': 'https://schema.org/ReturnByMail',
@@ -98,7 +98,7 @@ export default function ReturnPolicyPage() {
               <Banknote className="w-5 h-5 text-[#233F31] flex-shrink-0 mt-0.5" />
               <div>
                 <span className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Restocking Fee</span>
-                <span className="text-sm font-bold text-gray-900">None (£0 / $0)</span>
+                <span className="text-sm font-bold text-gray-900">None ($0)</span>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3.5 rounded-xl bg-gray-50 border border-gray-100">
@@ -186,7 +186,7 @@ export default function ReturnPolicyPage() {
                 <strong>Get your free return label</strong>. We&apos;ll email you a prepaid label after approving your return request.
               </li>
               <li>
-                <strong>Ship it back</strong> securely. Return postage is free for eligible UK and US returns, including defective items and change-of-mind returns.
+                <strong>Ship it back</strong> securely. Return postage is free for eligible US returns, including defective items and change-of-mind returns.
               </li>
               <li>
                 <strong>Get your refund</strong>. Once inspected, your refund is processed within 5 business days.

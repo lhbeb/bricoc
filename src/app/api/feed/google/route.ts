@@ -4,8 +4,8 @@ import { formatValidSku, mapConditionToGmc } from '@/lib/conditions';
 import type { Product } from '@/types/product';
 
 const BASE_URL = 'https://www.bricoc.com';
-const SUPPORTED_COUNTRIES = ['GB', 'US'] as const;
-const SUPPORTED_CURRENCIES = ['GBP', 'USD'] as const;
+const SUPPORTED_COUNTRIES = ['US'] as const;
+const SUPPORTED_CURRENCIES = ['USD'] as const;
 
 type FeedCountry = (typeof SUPPORTED_COUNTRIES)[number];
 type FeedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
@@ -14,7 +14,6 @@ const SHIPPING_BY_COUNTRY: Record<FeedCountry, {
   service: string;
   currency: FeedCurrency;
 }> = {
-  GB: { service: 'Free Standard Delivery', currency: 'GBP' },
   US: { service: 'Free Standard Shipping', currency: 'USD' },
 };
 
@@ -79,10 +78,10 @@ export async function GET(request: NextRequest) {
   );
 
   if (country === null) {
-    return new NextResponse('Unsupported country. Use GB or US.', { status: 400 });
+    return new NextResponse('Unsupported country. Use US.', { status: 400 });
   }
   if (currency === null) {
-    return new NextResponse('Unsupported currency. Use GBP or USD.', { status: 400 });
+    return new NextResponse('Unsupported currency. Use USD.', { status: 400 });
   }
 
   try {
@@ -134,7 +133,7 @@ export async function GET(request: NextRequest) {
       })
       .join('');
 
-    const targetLabel = country ? ` (${country})` : ' (GB + US)';
+    const targetLabel = country ? ` (${country})` : ' (US)';
     const currencyLabel = currency ? ` in ${currency}` : '';
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
