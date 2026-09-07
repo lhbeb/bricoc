@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { updateOrderStripeStatus } from '@/lib/supabase/orders';
+import { updateOrderStripeStatus, getOrderById } from '@/lib/supabase/orders';
+import { getProductBySlug } from '@/lib/supabase/products';
 import { getStripeConfig } from '@/lib/supabase/payment-settings';
 
 // Stripe initialization deferred to POST request handling to avoid build-time crashes
@@ -58,10 +59,59 @@ export async function POST(request: NextRequest) {
         const { orderId, product, shippingData } = body;
 
         // Validate required data
-        if (!orderId || !product || !shippingData) {
+        if (!orderId || !product?.slug || !shippingData) {
             return NextResponse.json(
                 { error: 'Missing required data: orderId, product or shippingData' },
                 { status: 400 }
+            );
+        }
+
+        // Server-side verification: NEVER trust client-supplied price/currency/title.
+        // The cart lives in localStorage, so a tampered price must not reach Stripe.
+        const dbProduct = await getProductBySlug(product.slug);
+        if (!dbProduct) {
+            console.error('🚨 [Stripe] Product not found or unpublished:', product.slug);
+            return NextResponse.json(
+                { error: 'This product is no longer available for purchase.' },
+                { status: 404 }
+            );
+        }
+
+        if (dbProduct.inStock === false) {
+            console.error('🚨 [Stripe] Product is out of stock:', product.slug);
+            return NextResponse.json(
+                { error: 'Sorry, this item is currently sold out.' },
+                { status: 409 }
+            );
+        }
+
+        // Verify the order exists and belongs to this product
+        const order = await getOrderById(orderId);
+        if (!order) {
+            console.error('🚨 [Stripe] Order not found:', orderId);
+            return NextResponse.json(
+                { error: 'Order could not be found. Please start checkout again.' },
+                { status: 400 }
+            );
+        }
+
+        if (order.product_slug !== dbProduct.slug) {
+            console.error('🚨 [Stripe] Order/product mismatch:', {
+                orderId,
+                orderSlug: order.product_slug,
+                productSlug: dbProduct.slug,
+            });
+            return NextResponse.json(
+                { error: 'Order does not match this product. Please start checkout again.' },
+                { status: 400 }
+            );
+        }
+
+        if (order.status === 'paid') {
+            console.error('🚨 [Stripe] Order already paid:', orderId);
+            return NextResponse.json(
+                { error: 'This order has already been paid.' },
+                { status: 409 }
             );
         }
 
@@ -69,28 +119,31 @@ export async function POST(request: NextRequest) {
         const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
         const shippingAddress = {
             line1: shippingData.streetAddress,
+            line2: shippingData.addressLine2 || undefined,
+            country: shippingData.countryCode || undefined,
             city: shippingData.city,
             state: shippingData.state,
             postal_code: shippingData.zipCode,
         };
+        const orderReference = order.order_number ? `#${order.order_number}` : orderId;
 
         // Create an embedded Stripe Checkout Session with expiration.
         // The delivery address is already collected and saved in our checkout flow,
         // so do not enable shipping_address_collection here. Asking again in Stripe
         // adds friction and can lower conversion.
+        // NOTE: price/currency/title come from the DATABASE, not the client.
         const session = await stripe.checkout.sessions.create({
             ui_mode: 'embedded',
             payment_method_types: ['card'],
             line_items: [
                 {
                     price_data: {
-                        currency: product.currency?.toLowerCase() || 'usd',
+                        currency: dbProduct.currency?.toLowerCase() || 'usd',
                         product_data: {
-                            name: product.title,
-                            description: `Product ID: ${product.slug}`,
-                            images: product.images && product.images.length > 0 ? [product.images[0]] : undefined,
+                            name: `Bricoc order - ${orderReference}`,
+                            images: dbProduct.images && dbProduct.images.length > 0 ? [dbProduct.images[0]] : undefined,
                         },
-                        unit_amount: Math.round(product.price * 100), // Stripe expects amount in cents
+                        unit_amount: Math.round(dbProduct.price * 100), // Stripe expects amount in cents
                     },
                     quantity: 1,
                 },
@@ -100,7 +153,7 @@ export async function POST(request: NextRequest) {
             customer_email: shippingData.email,
             payment_intent_data: {
                 shipping: {
-                    name: shippingData.email,
+                    name: shippingData.fullName || shippingData.email,
                     address: shippingAddress,
                 },
             },
@@ -108,8 +161,8 @@ export async function POST(request: NextRequest) {
             expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes from now
             metadata: {
                 order_id: orderId,
-                product_slug: product.slug,
-                product_id: product.id,
+                product_slug: dbProduct.slug,
+                product_id: dbProduct.id,
                 customer_email: shippingData.email,
                 shipping_address: shippingData.streetAddress,
                 shipping_city: shippingData.city,
@@ -119,11 +172,16 @@ export async function POST(request: NextRequest) {
         });
 
         // CRITICAL: Update the local database order with the Checkout Session ID
-        await updateOrderStripeStatus(orderId, {
+        const linked = await updateOrderStripeStatus(orderId, {
             stripe_checkout_session_id: session.id,
             status: 'pending_payment',
             checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
         });
+
+        if (!linked) {
+            // If the link fails, don't let the customer pay into an unlinked order.
+            throw new Error('Failed to link Stripe session to order');
+        }
 
         return NextResponse.json({
             clientSecret: session.client_secret,

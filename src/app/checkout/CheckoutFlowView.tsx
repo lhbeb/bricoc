@@ -127,7 +127,6 @@ export default function CheckoutFlowView({
           currency: product.currency,
           images: product.images,
         }}
-        sellerName={sellerName}
         onBack={onStripeBack}
       />
     );
