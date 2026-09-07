@@ -66,6 +66,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (typeof shippingData.fullName !== 'string' || !shippingData.fullName.trim()) {
+            return NextResponse.json({ error: 'Please enter your full name.' }, { status: 400 });
+        }
+        shippingData.fullName = shippingData.fullName.trim();
+
         // Server-side verification: NEVER trust client-supplied price/currency/title.
         // The cart lives in localStorage, so a tampered price must not reach Stripe.
         const dbProduct = await getProductBySlug(product.slug);

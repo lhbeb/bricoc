@@ -74,7 +74,7 @@ export function useCheckoutForm(product?: Product | null) {
   const isKofi = product?.checkoutFlow === 'kofi';
   const requiresCountry = usesCountryFirstAddress(product?.checkoutFlow);
   // Ko-fi collects buyer name in Phase 2 (payment processor), so skip it in Phase 1
-  const requiresFullName = requiresCountry && !isKofi;
+  const requiresFullName = product?.checkoutFlow === 'stripe' || (requiresCountry && !isKofi);
   // Only show the featured countries across all checkout flows (no "All countries" group)
   const availableOtherCountries: typeof OTHER_COUNTRIES = [];
 

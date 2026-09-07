@@ -53,8 +53,18 @@ function loadRoute(file, mocks) {
   assert.equal(session.line_items[0].price_data.product_data.name, 'Bricoc order - #123');
   assert.equal(session.payment_intent_data.shipping.address.line2, 'Unit 2');
   assert.equal(session.payment_intent_data.shipping.address.country, 'US');
+  assert.equal(session.payment_intent_data.shipping.name, 'Test Buyer');
   assert.equal(session.shipping_address_collection, undefined);
   assert.equal(updates[0].stripe_checkout_session_id, 'cs_test');
+  for (const fullName of [undefined, '', '   ']) {
+    reset();
+    const input = request();
+    const body = await input.json();
+    body.shippingData.fullName = fullName;
+    input.json = async () => body;
+    assert.equal((await create(input)).status, 400);
+    assert.equal(created.length, 0);
+  }
   for (const [change, expected] of [
     [() => product = null, 404], [() => product.inStock = false, 409],
     [() => order = null, 400], [() => order.product_slug = 'different', 400],
