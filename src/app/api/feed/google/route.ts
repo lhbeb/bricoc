@@ -3,7 +3,7 @@ import { getAllProducts } from '@/lib/data';
 import { formatValidSku, mapConditionToGmc } from '@/lib/conditions';
 import type { Product } from '@/types/product';
 
-const BASE_URL = 'https://bricoc.com';
+const BASE_URL = 'https://www.bricoc.com';
 const SUPPORTED_COUNTRIES = ['GB', 'US'] as const;
 const SUPPORTED_CURRENCIES = ['GBP', 'USD'] as const;
 

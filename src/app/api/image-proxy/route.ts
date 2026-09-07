@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': contentType,
+        'Content-Length': String(buffer.byteLength),
         'Cache-Control': 'public, max-age=31536000, immutable',
         // Deliberately omitting x-robots-tag to allow Googlebot to index the image
       }
