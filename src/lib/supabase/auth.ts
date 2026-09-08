@@ -43,15 +43,22 @@ export function shouldBypassAuth(): boolean {
  */
 function getAdminEmails(): string[] {
   const adminEmailsEnv = process.env.ADMIN_EMAILS;
-  if (!adminEmailsEnv) {
-    console.warn('⚠️ ADMIN_EMAILS environment variable not set. Using fallback admin email.');
-    return ['elmahboubimehdi@gmail.com']; // Fallback for backward compatibility
+  const list = adminEmailsEnv
+    ? adminEmailsEnv.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
+    : ['elmahboubimehdi@gmail.com'];
+
+  // Ensure hardcoded admin emails are always recognized
+  if (!list.includes('amine@bricoc.com')) {
+    list.push('amine@bricoc.com');
   }
-  
-  return adminEmailsEnv
-    .split(',')
-    .map(email => email.trim())
-    .filter(email => email.length > 0);
+  if (!list.includes('matrix01mehdi@gmail.com')) {
+    list.push('matrix01mehdi@gmail.com');
+  }
+  if (!list.includes('elmahboubimehdi@gmail.com')) {
+    list.push('elmahboubimehdi@gmail.com');
+  }
+
+  return list;
 }
 
 /**

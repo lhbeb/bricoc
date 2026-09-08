@@ -6,6 +6,7 @@ import { CreditCard, Save, ShieldOff, Eye, EyeOff, AlertCircle, RefreshCw, Check
 
 export default function PaymentSettingsPage() {
     const [adminRole, setAdminRole] = useState<string | null>(null);
+    const [isSpecialAdmin, setIsSpecialAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     
@@ -36,13 +37,29 @@ export default function PaymentSettingsPage() {
     // Initial load
     useEffect(() => {
         // Parse admin role constraint
-        const role = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('admin_role='))
-            ?.split('=')[1];
-            
-        // Some systems use super-admin, others SUPER_ADMIN
+        const cookies = document.cookie.split(';');
+        const roleCookie = cookies.find(row => row.trim().startsWith('admin_role='));
+        const role = roleCookie?.split('=')[1]?.trim();
         setAdminRole(role?.toUpperCase() || '');
+
+        const emailCookie = cookies.find(row => row.trim().startsWith('admin_email='));
+        const specialCookie = cookies.find(row => row.trim().startsWith('is_special_admin='));
+        let email = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]?.trim() || '') : '';
+        let special = specialCookie ? specialCookie.split('=')[1]?.trim() === 'true' : false;
+
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(atob(base64));
+                if (!email && payload.email) email = payload.email;
+            } catch (e) {}
+        }
+
+        if (email.toLowerCase() === 'amine@bricoc.com' || special) {
+            setIsSpecialAdmin(true);
+        }
 
         fetchSettings();
     }, []);
@@ -249,7 +266,7 @@ export default function PaymentSettingsPage() {
     return (
         <AdminLayout
             title="Payment Settings"
-            subtitle="Manage Stripe, PayPal Redirect, and PayPal Orders API settings."
+            subtitle={isSpecialAdmin ? "Manage Stripe payment settings." : "Manage Stripe, PayPal Redirect, and PayPal Orders API settings."}
         >
             {isLoading ? (
                 <div className="flex items-center justify-center py-24">
@@ -281,7 +298,7 @@ export default function PaymentSettingsPage() {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                    <div className={isSpecialAdmin ? "max-w-2xl" : "grid grid-cols-1 xl:grid-cols-2 gap-6 items-start"}>
 
                         {/* Stripe Configuration Card */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -373,176 +390,181 @@ export default function PaymentSettingsPage() {
                             </div>
                         </form>
                         </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
-                                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .92-.706h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.774-4.553z" fill="#003087"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Redirect Checkout</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                        <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Active — Receiving Payments' : 'Not Configured'}</p>
+
+                    {!isSpecialAdmin && (
+                        <>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                                            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .92-.706h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.774-4.553z" fill="#003087"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-[#262626] text-base">PayPal Redirect Checkout</h3>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                                <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Active — Receiving Payments' : 'Not Configured'}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <form onSubmit={handleSavePaypal} className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Your PayPal Email <span className="text-gray-400 font-normal">(receives all buyer payments)</span></label>
-                                <input
-                                    type="email"
-                                    value={paypalEmail}
-                                    onChange={(e) => setPaypalEmail(e.target.value)}
-                                    placeholder="e.g. me@paypal.com"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
-                                    required
-                                />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Enter the PayPal email that should receive buyer payments through the PayPal Standard redirect flow.</p>
-                            </div>
-
-                            <div className="pt-6 border-t border-gray-100 flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={isPaypalSaving}
-                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#003087] text-white rounded-xl hover:bg-[#001f5f] transition-colors text-sm font-medium shadow-lg shadow-blue-900/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isPaypalSaving ? (
-                                        <>
-                                            <RefreshCw className="h-4 w-4 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="h-4 w-4" />
-                                            Save PayPal Redirect Email
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden xl:col-span-2">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 rounded-xl bg-blue-50 text-[#003087] flex items-center justify-center flex-shrink-0">
-                                    <KeyRound className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Orders API Checkout</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <div className={`w-2 h-2 rounded-full ${isPaypalApiConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                        <p className="text-sm text-gray-500">
-                                            {isPaypalApiConfigured ? `Active in ${paypalApiMode === 'live' ? 'Live' : 'Sandbox'} mode` : 'Not Configured'}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSavePaypalApi} className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Environment</label>
-                                <div className="inline-flex p-1 bg-gray-100 rounded-xl" role="group" aria-label="PayPal environment">
-                                    {(['sandbox', 'live'] as const).map((environment) => (
-                                        <button
-                                            key={environment}
-                                            type="button"
-                                            onClick={() => setPaypalApiMode(environment)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                paypalApiMode === environment
-                                                    ? 'bg-white text-[#003087] shadow-sm'
-                                                    : 'text-gray-500 hover:text-gray-700'
-                                            }`}
-                                        >
-                                            {environment === 'sandbox' ? 'Sandbox' : 'Live'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Merchant Email</label>
-                                    <input
-                                        type="email"
-                                        value={paypalApiMerchantEmail}
-                                        onChange={(e) => setPaypalApiMerchantEmail(e.target.value)}
-                                        placeholder="merchant@example.com"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm"
-                                        autoComplete="email"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1.5 ml-1">Used to identify the PayPal business account receiving payments.</p>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
-                                    <input
-                                        type="text"
-                                        value={paypalApiClientId}
-                                        onChange={(e) => setPaypalApiClientId(e.target.value)}
-                                        placeholder="PayPal app Client ID"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm font-mono"
-                                        autoComplete="off"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="lg:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
-                                    <div className="relative">
+                                <form onSubmit={handleSavePaypal} className="p-6 space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Your PayPal Email <span className="text-gray-400 font-normal">(receives all buyer payments)</span></label>
                                         <input
-                                            type={showPaypalApiSecret ? 'text' : 'password'}
-                                            value={paypalApiClientSecret}
-                                            onChange={(e) => setPaypalApiClientSecret(e.target.value)}
-                                            placeholder="PayPal app Client Secret"
-                                            className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm font-mono"
-                                            autoComplete="new-password"
-                                            required={!isPaypalApiConfigured}
+                                            type="email"
+                                            value={paypalEmail}
+                                            onChange={(e) => setPaypalEmail(e.target.value)}
+                                            placeholder="e.g. me@paypal.com"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
+                                            required
                                         />
+                                        <p className="text-xs text-gray-500 mt-1.5 ml-1">Enter the PayPal email that should receive buyer payments through the PayPal Standard redirect flow.</p>
+                                    </div>
+
+                                    <div className="pt-6 border-t border-gray-100 flex justify-end">
                                         <button
-                                            type="button"
-                                            onClick={() => setShowPaypalApiSecret(!showPaypalApiSecret)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-md focus:outline-none"
-                                            aria-label={showPaypalApiSecret ? 'Hide Client Secret' : 'Show Client Secret'}
+                                            type="submit"
+                                            disabled={isPaypalSaving}
+                                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#003087] text-white rounded-xl hover:bg-[#001f5f] transition-colors text-sm font-medium shadow-lg shadow-blue-900/25 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {showPaypalApiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            {isPaypalSaving ? (
+                                                <>
+                                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="h-4 w-4" />
+                                                    Save PayPal Redirect Email
+                                                </>
+                                            )}
                                         </button>
                                     </div>
-                                    <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
-                                        <AlertCircle className="h-3.5 w-3.5" />
-                                        Use the Client Secret from your PayPal Developer app, never your PayPal account password.
-                                    </p>
-                                </div>
+                                </form>
                             </div>
 
-                            <div className="pt-6 border-t border-gray-100 flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={isPaypalApiSaving}
-                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#003087] text-white rounded-xl hover:bg-[#001f5f] transition-colors text-sm font-medium shadow-lg shadow-blue-900/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isPaypalApiSaving ? (
-                                        <>
-                                            <RefreshCw className="h-4 w-4 animate-spin" />
-                                            Verifying...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="h-4 w-4" />
-                                            Verify &amp; Save API Credentials
-                                        </>
-                                    )}
-                                </button>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden xl:col-span-2">
+                                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-11 h-11 rounded-xl bg-blue-50 text-[#003087] flex items-center justify-center flex-shrink-0">
+                                            <KeyRound className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-[#262626] text-base">PayPal Orders API Checkout</h3>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <div className={`w-2 h-2 rounded-full ${isPaypalApiConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                                <p className="text-sm text-gray-500">
+                                                    {isPaypalApiConfigured ? `Active in ${paypalApiMode === 'live' ? 'Live' : 'Sandbox'} mode` : 'Not Configured'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form onSubmit={handleSavePaypalApi} className="p-6 space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Environment</label>
+                                        <div className="inline-flex p-1 bg-gray-100 rounded-xl" role="group" aria-label="PayPal environment">
+                                            {(['sandbox', 'live'] as const).map((environment) => (
+                                                <button
+                                                    key={environment}
+                                                    type="button"
+                                                    onClick={() => setPaypalApiMode(environment)}
+                                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                        paypalApiMode === environment
+                                                            ? 'bg-white text-[#003087] shadow-sm'
+                                                            : 'text-gray-500 hover:text-gray-700'
+                                                    }`}
+                                                >
+                                                    {environment === 'sandbox' ? 'Sandbox' : 'Live'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Merchant Email</label>
+                                            <input
+                                                type="email"
+                                                value={paypalApiMerchantEmail}
+                                                onChange={(e) => setPaypalApiMerchantEmail(e.target.value)}
+                                                placeholder="merchant@example.com"
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm"
+                                                autoComplete="email"
+                                                required
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1.5 ml-1">Used to identify the PayPal business account receiving payments.</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                                            <input
+                                                type="text"
+                                                value={paypalApiClientId}
+                                                onChange={(e) => setPaypalApiClientId(e.target.value)}
+                                                placeholder="PayPal app Client ID"
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm font-mono"
+                                                autoComplete="off"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="lg:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showPaypalApiSecret ? 'text' : 'password'}
+                                                    value={paypalApiClientSecret}
+                                                    onChange={(e) => setPaypalApiClientSecret(e.target.value)}
+                                                    placeholder="PayPal app Client Secret"
+                                                    className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003087] focus:border-transparent text-sm font-mono"
+                                                    autoComplete="new-password"
+                                                    required={!isPaypalApiConfigured}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPaypalApiSecret(!showPaypalApiSecret)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-md focus:outline-none"
+                                                    aria-label={showPaypalApiSecret ? 'Hide Client Secret' : 'Show Client Secret'}
+                                                >
+                                                    {showPaypalApiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                </button>
+                                            </div>
+                                            <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
+                                                <AlertCircle className="h-3.5 w-3.5" />
+                                                Use the Client Secret from your PayPal Developer app, never your PayPal account password.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6 border-t border-gray-100 flex justify-end">
+                                        <button
+                                            type="submit"
+                                            disabled={isPaypalApiSaving}
+                                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#003087] text-white rounded-xl hover:bg-[#001f5f] transition-colors text-sm font-medium shadow-lg shadow-blue-900/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isPaypalApiSaving ? (
+                                                <>
+                                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                                    Verifying...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="h-4 w-4" />
+                                                    Verify &amp; Save API Credentials
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
-                    </div>
+                        </>
+                    )}
 
                     </div>
 

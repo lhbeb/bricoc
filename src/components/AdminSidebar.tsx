@@ -73,37 +73,59 @@ export default function AdminSidebar() {
   const [ordersCount, setOrdersCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isSpecialAdmin, setIsSpecialAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
 
   useEffect(() => {
-    // First try the dedicated non-HttpOnly cookie
+    // Read email and role cookies
     const cookies = document.cookie.split(';');
-    const roleCookie = cookies.find(c => c.trim().startsWith('admin_role='));
+    const emailCookie = cookies.find(c => c.trim().startsWith('admin_email='));
+    const specialCookie = cookies.find(c => c.trim().startsWith('is_special_admin='));
 
-    if (roleCookie) {
-      const role = roleCookie.split('=')[1]?.trim();
-      if (role === 'super-admin') {
-        setIsSuperAdmin(true);
-      } else if (role === 'admin') {
-        setIsAdmin(true);
-      }
-      return; // Cookie worked, skip JWT
-    }
+    let email = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]?.trim() || '') : '';
+    let special = specialCookie ? specialCookie.split('=')[1]?.trim() === 'true' : false;
 
-    // Fallback: try parsing the localStorage token
+    // Fallback: check localStorage token
     const token = localStorage.getItem('admin_token');
     if (token) {
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(atob(base64));
-        if (payload.role === 'super-admin') {
+        if (!email && payload.email) email = payload.email;
+      } catch (e) {
+        console.error("Failed to parse admin token.");
+      }
+    }
+
+    if (email.toLowerCase() === 'amine@bricoc.com' || special) {
+      setIsSpecialAdmin(true);
+      email = 'amine@bricoc.com';
+    }
+    setAdminEmail(email);
+
+    const roleCookie = cookies.find(c => c.trim().startsWith('admin_role='));
+    if (roleCookie) {
+      const role = roleCookie.split('=')[1]?.trim();
+      if (role === 'super-admin' || role === 'SUPER_ADMIN') {
+        setIsSuperAdmin(true);
+      } else {
+        setIsAdmin(true);
+      }
+      return;
+    }
+
+    if (token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        if (payload.role === 'super-admin' || payload.role === 'SUPER_ADMIN') {
           setIsSuperAdmin(true);
-        } else if (payload.role === 'admin') {
+        } else {
           setIsAdmin(true);
         }
-      } catch (e) {
-        console.error("Failed to parse admin token role.");
-      }
+      } catch (e) {}
     }
   }, []);
 
@@ -255,11 +277,11 @@ export default function AdminSidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-[#262626] text-sm truncate">
-                {isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Admin' : 'Administrator')}
+                {isSpecialAdmin ? 'Amine' : (isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Admin' : 'Administrator'))}
               </div>
               <div className="text-xs text-gray-500 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                Online
+                {isSpecialAdmin ? 'amine@bricoc.com' : 'Online'}
               </div>
             </div>
           </div>
@@ -269,10 +291,17 @@ export default function AdminSidebar() {
         <nav className="flex-1 px-3 overflow-y-auto">
           <div className="mb-6">
             <p className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-              Main Menu
+              {isSpecialAdmin ? 'Admin Menu' : 'Main Menu'}
             </p>
             <div className="space-y-1">
-              {getMainNavItems(ordersCount).map((item) => {
+              {(isSpecialAdmin
+                ? [
+                    { name: 'Products', path: '/admin/products', icon: Package, description: 'Manage inventory' },
+                    { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, description: 'View all orders', badge: ordersCount > 0 ? ordersCount : undefined },
+                    { name: 'Payment Settings', path: '/admin/payment-settings', icon: CreditCard, description: 'Stripe settings' },
+                  ]
+                : getMainNavItems(ordersCount)
+              ).map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
 
@@ -311,176 +340,182 @@ export default function AdminSidebar() {
                 );
               })}
 
-              {/* More — collapsible group */}
-              <div>
-                <button
-                  onClick={() => setMoreOpen((o) => !o)}
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                    ${moreNavItems.some((i) => isActive(i.path))
-                      ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
-                    }
-                  `}
-                >
-                  <MoreHorizontal
-                    className={`h-5 w-5 flex-shrink-0 ${
-                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
-                    }`}
-                  />
-                  <span className="flex-1 text-left font-medium text-sm">More</span>
-                  <ChevronDown
-                    className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
-                      moreOpen ? 'rotate-180' : ''
-                    } ${
-                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
-                    }`}
-                  />
-                </button>
-
-                {/* Dropdown items */}
-                <div
-                  className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                    moreOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="pl-3 space-y-1 border-l-2 border-gray-100 ml-4">
-                    {moreNavItems.map((item) => {
-                      const Icon = item.icon;
-                      const active = isActive(item.path);
-                      return (
-                        <Link
-                          key={item.path}
-                          href={item.path}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`
-                            flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                            ${active
-                              ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
-                              : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
-                            }
-                          `}
-                        >
-                          <Icon className={`h-5 w-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-400'}`} />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-medium text-sm block">{item.name}</span>
-                            {item.description && !active && (
-                              <span className="text-[11px] text-gray-400 truncate block">{item.description}</span>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Partner Links — logo-only, side by side compact */}
-          <div className="mt-2 pt-4 border-t border-gray-200 px-2 pb-2">
-            <div className="grid grid-cols-2 gap-2">
-              {/* Biozy */}
-              <a
-                href="https://www.biozy.co/admin/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                title="Open Biozy admin"
-                className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
-              >
-                <Image
-                  src="/biozy.svg"
-                  alt="Biozy"
-                  width={80}
-                  height={24}
-                  className="object-contain w-auto h-6"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
-                />
-              </a>
-
-              {/* GoLinks */}
-              <a
-                href="https://go.bricoc.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                title="Open GoLinks"
-                className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
-              >
-                <Image
-                  src="/golinks.svg"
-                  alt="GoLinks"
-                  width={90}
-                  height={24}
-                  className="object-contain w-auto h-6"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
-                />
-              </a>
-
-              {/* SMSFuck */}
-              <a
-                href="https://smsfuck.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                title="Open SMSFuck"
-                className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
-              >
-                <span className="font-bold text-[11px] tracking-wider uppercase text-gray-500" style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}>SMSFuck</span>
-              </a>
-
-              {/* Leynk */}
-              <a
-                href="https://leynk.co/admin"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                title="Open Leynk admin"
-                className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
-              >
-                <Image
-                  src="/leynk.svg"
-                  alt="Leynk"
-                  width={80}
-                  height={24}
-                  className="object-contain w-auto h-6"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
-                />
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div>
-            <p className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-              Quick Actions
-            </p>
-            <div className="space-y-1">
-              {quickActions.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
+              {/* More — collapsible group (hidden for special admin) */}
+              {!isSpecialAdmin && (
+                <div>
+                  <button
+                    onClick={() => setMoreOpen((o) => !o)}
                     className={`
-                      flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200
-                      ${active
+                      w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                      ${moreNavItems.some((i) => isActive(i.path))
                         ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
                       }
                     `}
                   >
-                    <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-400'}`} />
-                    <span className="font-medium text-sm">{item.name}</span>
-                  </Link>
-                );
-              })}
+                    <MoreHorizontal
+                      className={`h-5 w-5 flex-shrink-0 ${
+                        moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                      }`}
+                    />
+                    <span className="flex-1 text-left font-medium text-sm">More</span>
+                    <ChevronDown
+                      className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
+                        moreOpen ? 'rotate-180' : ''
+                      } ${
+                        moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                      }`}
+                    />
+                  </button>
+
+                  {/* Dropdown items */}
+                  <div
+                    className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                      moreOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="pl-3 space-y-1 border-l-2 border-gray-100 ml-4">
+                      {moreNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.path);
+                        return (
+                          <Link
+                            key={item.path}
+                            href={item.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`
+                              flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                              ${active
+                                ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
+                                : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
+                              }
+                            `}
+                          >
+                            <Icon className={`h-5 w-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-400'}`} />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-sm block">{item.name}</span>
+                              {item.description && !active && (
+                                <span className="text-[11px] text-gray-400 truncate block">{item.description}</span>
+                              )}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Partner Links — logo-only, side by side compact (hidden for special admin) */}
+          {!isSpecialAdmin && (
+            <div className="mt-2 pt-4 border-t border-gray-200 px-2 pb-2">
+              <div className="grid grid-cols-2 gap-2">
+                {/* Biozy */}
+                <a
+                  href="https://www.biozy.co/admin/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  title="Open Biozy admin"
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
+                >
+                  <Image
+                    src="/biozy.svg"
+                    alt="Biozy"
+                    width={80}
+                    height={24}
+                    className="object-contain w-auto h-6"
+                    style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
+                  />
+                </a>
+
+                {/* GoLinks */}
+                <a
+                  href="https://go.bricoc.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  title="Open GoLinks"
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
+                >
+                  <Image
+                    src="/golinks.svg"
+                    alt="GoLinks"
+                    width={90}
+                    height={24}
+                    className="object-contain w-auto h-6"
+                    style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
+                  />
+                </a>
+
+                {/* SMSFuck */}
+                <a
+                  href="https://smsfuck.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  title="Open SMSFuck"
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
+                >
+                  <span className="font-bold text-[11px] tracking-wider uppercase text-gray-500" style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}>SMSFuck</span>
+                </a>
+
+                {/* Leynk */}
+                <a
+                  href="https://leynk.co/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  title="Open Leynk admin"
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
+                >
+                  <Image
+                    src="/leynk.svg"
+                    alt="Leynk"
+                    width={80}
+                    height={24}
+                    className="object-contain w-auto h-6"
+                    style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
+                  />
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions (hidden for special admin) */}
+          {!isSpecialAdmin && (
+            <div>
+              <p className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                Quick Actions
+              </p>
+              <div className="space-y-1">
+                {quickActions.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`
+                        flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200
+                        ${active
+                          ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
+                          : 'text-gray-600 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-400'}`} />
+                      <span className="font-medium text-sm">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* Footer Actions */}

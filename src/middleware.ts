@@ -70,6 +70,23 @@ export async function middleware(request: NextRequest) {
         return response;
       }
 
+      // Special restricted admin: amine@bricoc.com only has access to:
+      // 1) Listed products (/admin/products)
+      // 2) Orders (/admin/orders)
+      // 3) Payment settings (/admin/payment-settings)
+      if (decoded.email?.toLowerCase() === 'amine@bricoc.com') {
+        const isAllowedPath =
+          pathname === '/admin/products' ||
+          pathname === '/admin/orders' ||
+          pathname.startsWith('/admin/orders/') ||
+          pathname === '/admin/payment-settings';
+
+        if (!isAllowedPath) {
+          console.log(`🚫 [MIDDLEWARE] Restricted admin ${decoded.email} blocked from ${pathname} -> redirecting to /admin/products`);
+          return NextResponse.redirect(new URL('/admin/products', request.url));
+        }
+      }
+
       // Authenticated admin, allow access
       const response = NextResponse.next();
       response.headers.set('x-pathname', pathname);

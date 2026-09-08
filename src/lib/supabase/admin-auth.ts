@@ -43,6 +43,11 @@ const ADMIN_CREDENTIALS = {
         password: 'Mehbde!!2',
         role: 'SUPER_ADMIN' as AdminRole,
     },
+    SPECIAL_ADMIN: {
+        email: 'amine@bricoc.com',
+        password: 'Amine!!2',
+        role: 'REGULAR_ADMIN' as AdminRole,
+    },
 };
 
 // ============================================
@@ -83,15 +88,21 @@ export async function authenticateAdmin(
         // Check if this is one of the hardcoded admin accounts
         const isRegularAdmin = normalizedEmail === ADMIN_CREDENTIALS.REGULAR_ADMIN.email.toLowerCase();
         const isSuperAdmin = normalizedEmail === ADMIN_CREDENTIALS.SUPER_ADMIN.email.toLowerCase();
+        const isSpecialAdmin = normalizedEmail === ADMIN_CREDENTIALS.SPECIAL_ADMIN.email.toLowerCase();
 
-        if (!isRegularAdmin && !isSuperAdmin) {
+        if (!isRegularAdmin && !isSuperAdmin && !isSpecialAdmin) {
             return { success: false, error: 'Invalid credentials' };
         }
 
         // Verify password
-        const expectedPassword = isRegularAdmin
-            ? ADMIN_CREDENTIALS.REGULAR_ADMIN.password
-            : ADMIN_CREDENTIALS.SUPER_ADMIN.password;
+        let expectedPassword = '';
+        if (isSpecialAdmin) {
+            expectedPassword = ADMIN_CREDENTIALS.SPECIAL_ADMIN.password;
+        } else if (isRegularAdmin) {
+            expectedPassword = ADMIN_CREDENTIALS.REGULAR_ADMIN.password;
+        } else {
+            expectedPassword = ADMIN_CREDENTIALS.SUPER_ADMIN.password;
+        }
 
         if (password !== expectedPassword) {
             // Log failed attempt
@@ -119,8 +130,11 @@ export async function authenticateAdmin(
 
         if (fetchError || !existingAdmin) {
             // Create admin user in database
-            const role = isRegularAdmin ? 'REGULAR_ADMIN' : 'SUPER_ADMIN';
+            const role = isSuperAdmin ? 'SUPER_ADMIN' : 'REGULAR_ADMIN';
             const passwordHash = await hashPassword(password);
+
+            const displayName = isSpecialAdmin ? 'Amine' : (isRegularAdmin ? 'Regular Admin' : 'Super Admin');
+            const department = isSpecialAdmin ? 'Restricted Administration' : (isRegularAdmin ? 'Operations' : 'System Administration');
 
             const { data: newAdmin, error: createError } = await supabaseAdmin
                 .from('admin_roles')
@@ -131,8 +145,9 @@ export async function authenticateAdmin(
                     is_active: true,
                     last_login: new Date().toISOString(),
                     metadata: {
-                        display_name: isRegularAdmin ? 'Regular Admin' : 'Super Admin',
-                        department: isRegularAdmin ? 'Operations' : 'System Administration',
+                        display_name: displayName,
+                        department: department,
+                        is_special: isSpecialAdmin,
                     },
                 })
                 .select()

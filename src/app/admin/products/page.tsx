@@ -67,6 +67,7 @@ export default function AdminProductsPage() {
   const [exportingGoogleCSV, setExportingGoogleCSV] = useState(false);
   const [exportingJSON, setExportingJSON] = useState(false);
   const [adminRole, setAdminRole] = useState<string | null>(null);
+  const [isSpecialAdmin, setIsSpecialAdmin] = useState(false);
   const FEATURE_LIMIT = FEATURED_PRODUCT_LIMIT;
   const itemsPerPage = 12;
 
@@ -98,11 +99,28 @@ export default function AdminProductsPage() {
   useEffect(() => {
     fetchProducts();
     // Get admin role from cookie
-    const role = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('admin_role='))
-      ?.split('=')[1];
-    setAdminRole(role || null);
+    const cookies = document.cookie.split(';');
+    const roleCookie = cookies.find(row => row.trim().startsWith('admin_role='));
+    setAdminRole(roleCookie?.split('=')[1]?.trim() || null);
+
+    const emailCookie = cookies.find(row => row.trim().startsWith('admin_email='));
+    const specialCookie = cookies.find(row => row.trim().startsWith('is_special_admin='));
+    let email = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]?.trim() || '') : '';
+    let special = specialCookie ? specialCookie.split('=')[1]?.trim() === 'true' : false;
+
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        if (!email && payload.email) email = payload.email;
+      } catch (e) {}
+    }
+
+    if (email.toLowerCase() === 'amine@bricoc.com' || special) {
+      setIsSpecialAdmin(true);
+    }
   }, [fetchProducts]);
 
   // Close dropdown when clicking outside
@@ -1053,13 +1071,15 @@ export default function AdminProductsPage() {
             )}
 
             {/* Add Product */}
-            <Link
-              href="/admin/products/new"
-              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25 whitespace-nowrap text-sm shrink-0"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="font-medium">Add Product</span>
-            </Link>
+            {!isSpecialAdmin && (
+              <Link
+                href="/admin/products/new"
+                className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25 whitespace-nowrap text-sm shrink-0"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="font-medium">Add Product</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -1123,13 +1143,15 @@ export default function AdminProductsPage() {
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-[#262626] mb-1">No products found</h3>
           <p className="text-gray-500 mb-4">Get started by adding your first product</p>
-          <Link
-            href="/admin/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]"
-          >
-            <Plus className="h-4 w-4" />
-            Add Product
-          </Link>
+          {!isSpecialAdmin && (
+            <Link
+              href="/admin/products/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]"
+            >
+              <Plus className="h-4 w-4" />
+              Add Product
+            </Link>
+          )}
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

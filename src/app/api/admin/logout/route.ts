@@ -38,6 +38,14 @@ export async function POST(request: NextRequest) {
             path: '/',
         });
 
+        response.cookies.set('is_special_admin', '', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 0,
+            path: '/',
+        });
+
         return response;
     } catch (error) {
         console.error('Logout error:', error);

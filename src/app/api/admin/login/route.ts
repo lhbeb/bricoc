@@ -120,6 +120,16 @@ export async function POST(request: NextRequest) {
       httpOnly: false, // Allow client to read this
     });
 
+    // If amine@bricoc.com, set special restricted admin flag cookie
+    if (admin.email.toLowerCase() === 'amine@bricoc.com') {
+      response.cookies.set('is_special_admin', 'true', {
+        ...cookieOptions,
+        httpOnly: false,
+      });
+    } else {
+      response.cookies.delete('is_special_admin');
+    }
+
     console.log('🍪 [Admin Login] Cookies set');
 
     // Log successful login (already logged in authenticateAdmin, but log again with IP/UA)

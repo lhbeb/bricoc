@@ -1,15 +1,16 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Package, ShoppingCart, Plus, FileArchive, LogOut, Home, Mail } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package, ShoppingCart, Plus, FileArchive, LogOut, Home, Mail, CreditCard } from 'lucide-react';
 
 interface AdminNavProps {
   title: string;
 }
 
 // Define admin pages in order for navigation
-const ADMIN_PAGES = [
+const DEFAULT_ADMIN_PAGES = [
   { path: '/admin/products', name: 'Products', icon: Package },
   { path: '/admin/orders', name: 'Orders', icon: ShoppingCart },
   { path: '/admin/products/new', name: 'Add Product', icon: Plus },
@@ -17,14 +18,46 @@ const ADMIN_PAGES = [
   { path: '/admin/mail-project', name: 'Mail Project', icon: Mail },
 ];
 
+const SPECIAL_ADMIN_PAGES = [
+  { path: '/admin/products', name: 'Products', icon: Package },
+  { path: '/admin/orders', name: 'Orders', icon: ShoppingCart },
+  { path: '/admin/payment-settings', name: 'Payment Settings', icon: CreditCard },
+];
+
 export default function AdminNav({ title }: AdminNavProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isSpecialAdmin, setIsSpecialAdmin] = useState(false);
+
+  useEffect(() => {
+    const cookies = document.cookie.split(';');
+    const emailCookie = cookies.find(c => c.trim().startsWith('admin_email='));
+    const specialCookie = cookies.find(c => c.trim().startsWith('is_special_admin='));
+
+    let email = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]?.trim() || '') : '';
+    let special = specialCookie ? specialCookie.split('=')[1]?.trim() === 'true' : false;
+
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        if (!email && payload.email) email = payload.email;
+      } catch (e) {}
+    }
+
+    if (email.toLowerCase() === 'amine@bricoc.com' || special) {
+      setIsSpecialAdmin(true);
+    }
+  }, []);
+
+  const adminPages = isSpecialAdmin ? SPECIAL_ADMIN_PAGES : DEFAULT_ADMIN_PAGES;
 
   // Find current page index
-  const currentIndex = ADMIN_PAGES.findIndex(page => page.path === pathname);
-  const prevPage = currentIndex > 0 ? ADMIN_PAGES[currentIndex - 1] : null;
-  const nextPage = currentIndex < ADMIN_PAGES.length - 1 ? ADMIN_PAGES[currentIndex + 1] : null;
+  const currentIndex = adminPages.findIndex(page => page.path === pathname);
+  const prevPage = currentIndex > 0 ? adminPages[currentIndex - 1] : null;
+  const nextPage = currentIndex < adminPages.length - 1 ? adminPages[currentIndex + 1] : null;
 
   const handleLogout = async () => {
     try {
@@ -66,7 +99,7 @@ export default function AdminNav({ title }: AdminNavProps) {
                 <Home className="h-3 w-3" />
                 <span>Admin</span>
                 <ChevronRight className="h-3 w-3" />
-                <span className="text-white font-semibold">{ADMIN_PAGES.find(p => p.path === pathname)?.name || title}</span>
+                <span className="text-white font-semibold">{adminPages.find(p => p.path === pathname)?.name || title}</span>
               </div>
             </div>
 
@@ -90,7 +123,7 @@ export default function AdminNav({ title }: AdminNavProps) {
         <div className="flex items-center justify-between flex-wrap gap-3">
           {/* Page Navigation Pills */}
           <div className="flex items-center gap-2 flex-wrap">
-            {ADMIN_PAGES.map((page) => {
+            {adminPages.map((page) => {
               const Icon = page.icon;
               const isActive = pathname === page.path;
 
@@ -122,7 +155,7 @@ export default function AdminNav({ title }: AdminNavProps) {
 
         {/* Page Indicator Dots */}
         <div className="flex items-center justify-center gap-2 mt-4">
-          {ADMIN_PAGES.map((page, index) => (
+          {adminPages.map((page, index) => (
             <div
               key={page.path}
               className={`h-2 rounded-full transition-all duration-300 ${pathname === page.path
