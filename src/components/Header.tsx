@@ -10,8 +10,10 @@ import ClientOnly from './ClientOnly';
 import SearchBar from './SearchBar';
 
 const catalogNavigation = [
-  { label: 'Golf Bags', href: '/search?category=Golf%20Bags' },
-  { label: 'Golf Accessories', href: '/search?category=Golf%20Accessories' },
+  { label: 'All Carts', href: '/#products' },
+  { label: '2-Seater Golf Carts', href: '/search?category=2-Seater%20Golf%20Carts' },
+  { label: '4-Seater Golf Carts', href: '/search?category=4-Seater%20Golf%20Carts' },
+  { label: '6-Seater Golf Carts', href: '/search?category=6-Seater%20Golf%20Carts' },
   { label: 'Featured', href: '/#featured' },
   { label: 'Track Order', href: '/track' },
   { label: 'FAQs', href: '/frequently-asked-questions' },

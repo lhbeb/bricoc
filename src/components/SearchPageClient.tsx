@@ -12,15 +12,9 @@ interface SearchPageClientProps {
 }
 
 const CATALOG_CATEGORIES = [
-  "Blowers",
-  "Hardware",
-  "Lawn Mowers",
-  "Pressure Washers",
-  "Swimming Pools",
-  "Bikes",
-  "Electric Scooters",
-  "Tents",
-  "Vacuum Cleaners",
+  "2-Seater Golf Carts",
+  "4-Seater Golf Carts",
+  "6-Seater Golf Carts",
 ] as const;
 
 function getExactCatalogCategory(value: string): string {
