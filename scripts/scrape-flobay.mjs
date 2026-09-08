@@ -179,13 +179,36 @@ function extractDescription(html) {
   return '';
 }
 
+function isExcludedImageUrl(url) {
+  const lower = url.toLowerCase();
+  const excludedKeywords = [
+    'logo', 'icon', 'payment', 'credit', 'badge', 'banner',
+    'pin', 'phone', 'call', 'footer', 'header', 'cart', 'search',
+    'favicon', 'avatar', 'whatsapp', 'social', 'trust', 'guarantee'
+  ];
+  return excludedKeywords.some(kw => lower.includes(kw));
+}
+
 function extractImages(html) {
   const images = new Set();
-  // WooCommerce gallery data-large_image
+  
+  // 1. WooCommerce product gallery data-large_image
   for (const m of html.matchAll(/data-large_image="([^"]+)"/g)) {
-    images.add(decodeURIComponent(m[1]));
+    const url = decodeURIComponent(m[1]).trim();
+    if (!isExcludedImageUrl(url)) {
+      images.add(url);
+    }
   }
-  // JSON-LD images
+
+  // 2. WooCommerce product gallery link anchors (href in product-gallery)
+  for (const m of html.matchAll(/class="[^"]*woocommerce-product-gallery__image[^"]*"[^>]*>\s*<a[^>]*href="([^"]+\.(?:jpg|jpeg|png|webp))"/gi)) {
+    const url = decodeURIComponent(m[1]).trim();
+    if (!isExcludedImageUrl(url)) {
+      images.add(url);
+    }
+  }
+
+  // 3. JSON-LD structured product image data
   for (const block of [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]) {
     try {
       const data = JSON.parse(block[1]);
@@ -195,15 +218,14 @@ function extractImages(html) {
         const imgs = Array.isArray(item.image) ? item.image : [item.image];
         for (const img of imgs) {
           const url = typeof img === 'string' ? img : (img.url || img.contentUrl);
-          if (url?.includes('flobay.com/wp-content/uploads')) images.add(url);
+          if (url?.includes('flobay.com/wp-content/uploads') && !isExcludedImageUrl(url)) {
+            images.add(url.trim());
+          }
         }
       }
     } catch {}
   }
-  // Full-size wp uploads (skip resized thumbnails)
-  for (const m of html.matchAll(/https:\/\/flobay\.com\/wp-content\/uploads\/[^\s"'<>]+\.(jpg|jpeg|png|webp)/gi)) {
-    if (!m[0].match(/-\d+x\d+\.(jpg|jpeg|png|webp)$/i)) images.add(m[0]);
-  }
+
   return [...images].slice(0, 15);
 }
 
