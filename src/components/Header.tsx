@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { ShoppingCart, Menu, X, Search, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { ShoppingCart, Menu, X, Search, ChevronLeft, ChevronRight, Info, MessageCircle } from 'lucide-react';
 import { getCartCount } from '@/utils/cart';
 import ClientOnly from './ClientOnly';
 import SearchBar from './SearchBar';
@@ -44,7 +44,7 @@ const Header = () => {
   const announcements = [
     <span key="nav-1">🚚 <span className="font-bold">Free Nationwide Delivery</span> On All Bricoc Golf Carts ⛳</span>,
     <span key="nav-2">⚡ <span className="font-bold">Premium Lithium Power</span> & <span className="font-bold">3-Year Warranty</span></span>,
-    "whatsapp-contact" // Special marker for WhatsApp announcement
+    "live-chat" // Special marker for live chat announcement
   ];
 
   // Announcement bar animation
@@ -140,25 +140,12 @@ const Header = () => {
         <div suppressHydrationWarning={true} className="container mx-auto px-4 flex items-center justify-center relative w-full h-full text-xs sm:text-sm">
           {/* Announcement Text */}
           <div suppressHydrationWarning={true} className="text-center font-medium px-4 sm:px-16 transition-all duration-500 ease-in-out h-full flex items-center justify-center min-h-[24px]">
-            {announcements[currentAnnouncement] === "whatsapp-contact" ? (
+            {announcements[currentAnnouncement] === "live-chat" ? (
               <div key={currentAnnouncement} className="flex items-center justify-center animate-fade-in text-xs sm:text-sm h-full w-full">
-                <a
-                  href="https://wa.me/19129231747"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 hover:opacity-80 transition-opacity flex-wrap justify-center text-[#233F31]"
-                  aria-label="Contact Bricoc on WhatsApp"
-                >
-                  <Image
-                    src="/whatsapp-svgrepo-com.svg"
-                    alt="WhatsApp"
-                    width={18}
-                    height={18}
-                    className="w-4 h-4 sm:w-4.5 sm:h-4.5 flex-shrink-0"
-                  />
-                  <span className="whitespace-nowrap">Golf Cart Specialist? <span className="font-bold">Chat with Bricoc</span></span>
-                  <span className="underline whitespace-nowrap font-bold">+19129231747</span>
-                </a>
+                <div className="flex items-center gap-1.5 justify-center text-[#233F31]">
+                  <MessageCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                  <span className="whitespace-nowrap">Questions? <span className="font-bold">Live Chat Available</span></span>
+                </div>
               </div>
             ) : (
               <span key={currentAnnouncement} className="inline-block animate-fade-in whitespace-nowrap text-xs sm:text-sm h-full flex items-center text-[#233F31]">
