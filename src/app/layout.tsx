@@ -15,6 +15,7 @@ import FacebookPixel from "@/components/FacebookPixel";
 import { AdminRouteCheck, PublicRouteOnly, AdminRouteOnly, CheckoutRouteOnly } from "@/components/AdminRouteCheck";
 import GlobalErrorReporter from "@/components/GlobalErrorReporter";
 import LiveChatWidget from "@/components/LiveChatWidget";
+import GoogleTagTracker from "@/components/GoogleTagTracker";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -134,6 +135,9 @@ export default function RootLayout({
         <GlobalErrorReporter />
         <Suspense fallback={null}>
           <FacebookPixel />
+        </Suspense>
+        <Suspense fallback={null}>
+          <GoogleTagTracker />
         </Suspense>
         <PublicRouteOnly>
           <VisitNotifier />

@@ -2,6 +2,8 @@ export const GOOGLE_ADS_ID = 'AW-18441617346';
 
 const PURCHASE_CONVERSION_LABEL = '1UFCCJKbtfMcEML_0tlE';
 const ADD_TO_BASKET_CONVERSION_LABEL = '-UI4CKKrwvMcEML_0tlE';
+const BEGIN_CHECKOUT_CONVERSION_LABEL = 'jFkACPS7wvMcEML_0tlE';
+export const PAGE_VIEW_CONVERSION_LABEL = 'DfaeCNLDwvMcEML_0tlE';
 
 type Gtag = (...args: unknown[]) => void;
 
@@ -52,6 +54,28 @@ export function queueGoogleAdsAddToBasket(value: number, currency: string, itemD
         quantity: 1,
       },
     ],
+  });
+
+  return true;
+}
+
+export function queueGoogleAdsBeginCheckout(value: number, currency: string): boolean {
+  const gtag = getGoogleAdsTag();
+  if (!gtag) return false;
+
+  const validValue = Number.isFinite(value) && value > 0 ? value : 1.0;
+  const validCurrency = currency || 'USD';
+
+  gtag('event', 'conversion', {
+    send_to: `${GOOGLE_ADS_ID}/${BEGIN_CHECKOUT_CONVERSION_LABEL}`,
+    value: validValue,
+    currency: validCurrency,
+  });
+
+  // Standard ecommerce begin_checkout event for GA4 / GMC
+  gtag('event', 'begin_checkout', {
+    value: validValue,
+    currency: validCurrency,
   });
 
   return true;
