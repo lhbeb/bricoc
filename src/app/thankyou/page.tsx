@@ -7,11 +7,58 @@ import { useSearchParams } from 'next/navigation';
 import { trackPixelEvent } from '@/lib/pixel';
 import { clearPendingOrder, getPendingOrder } from '@/lib/pendingOrder';
 import { CART_STORAGE_KEY, clearCart } from '@/utils/cart';
+import { queueGoogleAdsPurchase } from '@/lib/googleAds';
 
 // Window within which a pending order is treated as a real BMC conversion.
 // BMC has no webhook/payment confirmation, so this guards against firing a
 // Purchase for a stale/abandoned attempt.
 const PENDING_ORDER_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+
+const PURCHASE_TRACKED_KEY_PREFIX = 'purchase_tracked:';
+
+interface PurchaseTrackingData {
+  value: number;
+  currency: string;
+  transactionId: string;
+  email?: string | null;
+  contentId?: string;
+  contentName?: string;
+}
+
+function trackPurchaseOnce(data: PurchaseTrackingData): boolean {
+  if (!data.transactionId || !Number.isFinite(data.value) || data.value <= 0) return false;
+
+  const trackingKey = `${PURCHASE_TRACKED_KEY_PREFIX}${data.transactionId}`;
+  if (sessionStorage.getItem(trackingKey)) return true;
+
+  trackPixelEvent(
+    'Purchase',
+    {
+      value: data.value,
+      currency: data.currency,
+      content_ids: data.contentId ? [data.contentId] : [],
+      content_name: data.contentName || '',
+      content_type: 'product',
+      num_items: 1,
+    },
+    { eventID: data.transactionId }
+  );
+
+  const googleQueued = queueGoogleAdsPurchase({
+    value: data.value,
+    currency: data.currency,
+    transactionId: data.transactionId,
+    email: data.email,
+    contentId: data.contentId,
+    contentName: data.contentName,
+  });
+
+  if (googleQueued) {
+    sessionStorage.setItem(trackingKey, '1');
+  }
+
+  return googleQueued;
+}
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
@@ -21,9 +68,7 @@ function ThankYouContent() {
   const isSuccessful = isStaticSuccess || orderDetails?.status === 'paid';
 
   useEffect(() => {
-    // Stripe flow: fire Purchase only from the server-verified session, using the
-    // order id as the Meta eventID for dedup. No cart-based event is fired here,
-    // so a Stripe order can never double-fire a Purchase.
+    // Stripe flow: fire Purchase only from the server-verified session
     if (sessionId) {
       const verifyInBackground = async () => {
         try {
@@ -38,35 +83,14 @@ function ThankYouContent() {
             setOrderDetails(data);
 
             if (data.status === 'paid') {
-              const orderId = data.orderId as string | undefined;
-              const guardKey = orderId
-                ? `purchase_tracked_${orderId}`
-                : 'purchase_tracked_stripe';
-
-              if (!sessionStorage.getItem(guardKey)) {
-                trackPixelEvent(
-                  'Purchase',
-                  {
-                    value: data.amount ? data.amount / 100 : 0,
-                    currency: data.currency ? data.currency.toUpperCase() : 'USD',
-                    content_ids: data.productSlug ? [data.productSlug] : [],
-                    content_name: data.productTitle || '',
-                    content_type: 'product',
-                    num_items: 1,
-                  },
-                  { eventID: orderId || undefined }
-                );
-                // Google Ads conversion event
-                if (typeof window !== 'undefined' && (window as any).gtag) {
-                  (window as any).gtag('event', 'conversion', {
-                    send_to: 'AW-18441617346/1UFCCJKbtfMcEML_0tlE',
-                    value: data.amount ? data.amount / 100 : 0,
-                    currency: data.currency ? data.currency.toUpperCase() : 'USD',
-                    transaction_id: orderId || '',
-                  });
-                }
-                sessionStorage.setItem(guardKey, '1');
-              }
+              trackPurchaseOnce({
+                value: data.amount ? data.amount / 100 : 0,
+                currency: data.currency ? data.currency.toUpperCase() : 'USD',
+                transactionId: data.orderId || sessionId,
+                email: data.email || data.customerEmail,
+                contentId: data.productSlug || data.orderId,
+                contentName: data.productTitle,
+              });
             }
           } else {
             console.warn('⚠️ Payment verification failed, falling back to pending UI');
@@ -82,14 +106,7 @@ function ThankYouContent() {
       return;
     }
 
-    // Non-Stripe flows (Buy Me A Coffee / external): the user only reaches this
-    // page after a completed payment. Fire Purchase from the pending order saved
-    // at checkout, with eventID = orderId so Meta can dedupe it against a
-    // server-side Conversions API event on confirmation.
-    //
-    // False-positive safeguard: BMC has no webhook, so the pending order is only
-    // treated as a real conversion within a short window. A stale pending order
-    // (e.g. from an abandoned attempt) is suppressed instead of firing.
+    // Non-Stripe flows (Buy Me A Coffee / external)
     const pending = getPendingOrder();
     const isPendingFresh =
       !!pending && Date.now() - new Date(pending.createdAt).getTime() <= PENDING_ORDER_WINDOW_MS;
@@ -97,8 +114,7 @@ function ThankYouContent() {
     let orderId = isPendingFresh ? pending!.orderId : null;
     let product: any = isPendingFresh ? pending!.product : null;
 
-    // Cart fallback only when there was no pending order at all (legacy path),
-    // with validation so invalid/missing data can't produce a Purchase.
+    // Cart fallback only when there was no pending order at all (legacy path)
     if (!pending) {
       try {
         const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -113,35 +129,14 @@ function ThankYouContent() {
       }
     }
 
-    if (product) {
-      const guardKey = orderId
-        ? `purchase_tracked_${orderId}`
-        : 'purchase_tracked_cart';
-
-      if (!sessionStorage.getItem(guardKey)) {
-        trackPixelEvent(
-          'Purchase',
-          {
-            value: product.price || 0,
-            currency: product.currency || 'USD',
-            content_ids: [product.slug || product.id || ''],
-            content_name: product.title || '',
-            content_type: 'product',
-            num_items: 1,
-          },
-          { eventID: orderId || undefined }
-        );
-        // Google Ads conversion event
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-          (window as any).gtag('event', 'conversion', {
-            send_to: 'AW-18441617346/1UFCCJKbtfMcEML_0tlE',
-            value: product.price || 0,
-            currency: product.currency || 'USD',
-            transaction_id: orderId || '',
-          });
-        }
-        sessionStorage.setItem(guardKey, '1');
-      }
+    if (product && orderId) {
+      trackPurchaseOnce({
+        value: product.price || 0,
+        currency: product.currency || 'USD',
+        transactionId: orderId,
+        contentId: product.slug || product.id || '',
+        contentName: product.title || '',
+      });
     }
 
     clearCart();
