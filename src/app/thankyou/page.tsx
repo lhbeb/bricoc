@@ -56,6 +56,15 @@ function ThankYouContent() {
                   },
                   { eventID: orderId || undefined }
                 );
+                // Google Ads conversion event
+                if (typeof window !== 'undefined' && (window as any).gtag) {
+                  (window as any).gtag('event', 'conversion', {
+                    send_to: 'AW-18441617346/1UFCCJKbtfMcEML_0tlE',
+                    value: data.amount ? data.amount / 100 : 0,
+                    currency: data.currency ? data.currency.toUpperCase() : 'USD',
+                    transaction_id: orderId || '',
+                  });
+                }
                 sessionStorage.setItem(guardKey, '1');
               }
             }
@@ -122,6 +131,15 @@ function ThankYouContent() {
           },
           { eventID: orderId || undefined }
         );
+        // Google Ads conversion event
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'conversion', {
+            send_to: 'AW-18441617346/1UFCCJKbtfMcEML_0tlE',
+            value: product.price || 0,
+            currency: product.currency || 'USD',
+            transaction_id: orderId || '',
+          });
+        }
         sessionStorage.setItem(guardKey, '1');
       }
     }
