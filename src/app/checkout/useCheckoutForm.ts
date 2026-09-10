@@ -75,18 +75,38 @@ export function useCheckoutForm(product?: Product | null) {
   const requiresCountry = usesCountryFirstAddress(product?.checkoutFlow);
   // Ko-fi collects buyer name in Phase 2 (payment processor), so skip it in Phase 1
   const requiresFullName = product?.checkoutFlow === 'stripe' || (requiresCountry && !isKofi);
-  // Only show the featured countries across all checkout flows (no "All countries" group)
-  const availableOtherCountries: typeof OTHER_COUNTRIES = [];
 
-  // When the product loads, set the default country based on its market/currency
+  // When the product loads, set the default country based on its market/currency,
+  // then refine it from the visitor's location when available.
   useEffect(() => {
     if (hasInitialized || !product) return;
+
     const defaultCountry = inferDefaultCountry(product);
     setShippingData(prev => ({
       ...prev,
       countryCode: defaultCountry.code,
       country: defaultCountry.name,
     }));
+
+    fetch('https://get.geojs.io/v1/ip/country.json')
+      .then(response => response.json())
+      .then(data => {
+        if (!data?.country) return;
+
+        const code = String(data.country).toUpperCase();
+        const country = getCountryName(code);
+        if (!country) return;
+
+        setShippingData(previous => ({
+          ...previous,
+          countryCode: code,
+          country,
+        }));
+      })
+      .catch(() => {
+        // The product market/currency fallback remains selected.
+      });
+
     setHasInitialized(true);
   }, [product, hasInitialized]);
 
@@ -220,8 +240,8 @@ export function useCheckoutForm(product?: Product | null) {
     isKofi,
     requiresCountry,
     requiresFullName,
-    featuredCountries: FEATURED_COUNTRIES,
-    otherCountries: availableOtherCountries,
+    featuredCountries: [...FEATURED_COUNTRIES, ...OTHER_COUNTRIES],
+    otherCountries: [],
     addressConfig,
     isPostalCodeValid: postalCodeIsValid,
     isUK,
