@@ -1,5 +1,6 @@
 import type { Product } from '@/types/product';
 import { debugCart, debugError } from './debug';
+import { queueGoogleAdsAddToBasket } from '@/lib/googleAds';
 
 export interface CartItem {
   product: Product;
@@ -72,6 +73,13 @@ export function addToCart(product: Product): void {
     try {
       localStorage.setItem(CART_STORAGE_KEY, serialized);
       debugCart('addToCart: stored in localStorage', { key: CART_STORAGE_KEY });
+
+      // Fire only after the basket mutation succeeds. The Google command is
+      // queued safely even if gtag.js is still downloading.
+      queueGoogleAdsAddToBasket(cleanProduct.price, cleanProduct.currency || 'USD', {
+        id: cleanProduct.id,
+        name: cleanProduct.title,
+      });
     } catch (storageError) {
       debugError('addToCart: localStorage.setItem failed', storageError);
       throw storageError;

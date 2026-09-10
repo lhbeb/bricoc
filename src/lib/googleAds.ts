@@ -1,6 +1,7 @@
 export const GOOGLE_ADS_ID = 'AW-18441617346';
 
 const PURCHASE_CONVERSION_LABEL = '1UFCCJKbtfMcEML_0tlE';
+const ADD_TO_BASKET_CONVERSION_LABEL = '-UI4CKKrwvMcEML_0tlE';
 
 type Gtag = (...args: unknown[]) => void;
 
@@ -23,6 +24,37 @@ export function getGoogleAdsTag(): Gtag | null {
   }
 
   return window.gtag;
+}
+
+export function queueGoogleAdsAddToBasket(value: number, currency: string, itemData?: { id?: string; name?: string }): boolean {
+  const gtag = getGoogleAdsTag();
+  if (!gtag) return false;
+
+  const validValue = Number.isFinite(value) && value > 0 ? value : 1.0;
+  const validCurrency = currency || 'USD';
+
+  // Google Ads specific conversion action
+  gtag('event', 'conversion', {
+    send_to: `${GOOGLE_ADS_ID}/${ADD_TO_BASKET_CONVERSION_LABEL}`,
+    value: validValue,
+    currency: validCurrency,
+  });
+
+  // Standard ecommerce event for Google Tag / Merchant Center / GA4
+  gtag('event', 'add_to_cart', {
+    value: validValue,
+    currency: validCurrency,
+    items: [
+      {
+        item_id: itemData?.id || 'product',
+        item_name: itemData?.name || 'Product',
+        price: validValue,
+        quantity: 1,
+      },
+    ],
+  });
+
+  return true;
 }
 
 interface PurchaseConversion {
