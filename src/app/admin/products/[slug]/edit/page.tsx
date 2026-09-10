@@ -107,6 +107,11 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
+  const [returnTo] = useState(() => {
+    if (typeof window === 'undefined') return '/admin/products';
+    const value = new URLSearchParams(window.location.search).get('returnTo');
+    return value?.startsWith('/admin/products') ? value : '/admin/products';
+  });
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
 
   const [loading, setLoading] = useState(true);
@@ -414,7 +419,7 @@ export default function EditProductPage() {
       setHasChanges(false);
 
       if (finalSlug !== slug) {
-        setTimeout(() => router.push(`/admin/products/${finalSlug}/edit`), 1000);
+        setTimeout(() => router.push(`/admin/products/${finalSlug}/edit?returnTo=${encodeURIComponent(returnTo)}`), 1000);
       } else {
         // Refetch product to ensure we have the latest data (especially if published status changed)
         await fetchProduct();
@@ -435,7 +440,7 @@ export default function EditProductPage() {
         <div className="text-center py-16">
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">Product not found</p>
-          <Link href="/admin/products" className="text-[#090A28] hover:underline">← Back to products</Link>
+          <Link href={returnTo} className="text-[#090A28] hover:underline">← Back to products</Link>
         </div>
       </AdminLayout>
     );
@@ -452,7 +457,7 @@ export default function EditProductPage() {
       <div className="sticky top-0 z-50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm mb-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/admin/products" className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
+            <Link href={returnTo} className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
               <ArrowLeft className="h-5 w-5 text-gray-500" />
             </Link>
             <div className="min-w-0">
