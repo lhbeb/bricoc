@@ -61,10 +61,10 @@ function MobileCheckoutCTA({
         type={onClick ? 'button' : 'submit'}
         onClick={onClick}
         disabled={disabled}
-        className={`w-full font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-lg sm:text-xl ${
+        className={`w-full font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#233F31] focus:ring-offset-2 text-lg sm:text-xl ${
           disabled
             ? 'bg-gray-400 cursor-not-allowed text-white'
-            : 'bg-[#090A28] hover:bg-[#1c2070] text-white active:scale-[0.98]'
+            : 'bg-[#233F31] hover:bg-[#1a3025] text-white active:scale-[0.98]'
         }`}
       >
         {isLoading ? (
@@ -114,7 +114,7 @@ function StateSuggestions({
             aria-selected={isSelected}
             tabIndex={isSelected ? 0 : -1}
             className={`w-full text-left p-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 ${
-              isSelected ? 'bg-blue-50 text-[#090A28]' : 'text-[#262626]'
+              isSelected ? 'bg-blue-50 text-[#233F31]' : 'text-[#262626]'
             }`}
             onClick={() => form.handleStateSelect(suggestion)}
           >
@@ -134,7 +134,7 @@ function AddressFields({
   mobile?: boolean;
 }) {
   const inputRadius = mobile ? 'rounded-xl' : 'rounded-lg';
-  const inputClassName = `w-full px-4 py-4 border-2 border-gray-200 ${inputRadius} focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] transition-all duration-300`;
+  const inputClassName = `w-full px-4 py-4 border-2 border-gray-200 ${inputRadius} focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] transition-all duration-300`;
   const idSuffix = mobile ? '-mobile' : '-desktop';
   const fieldId = (name: string) => form.requiresCountry ? `${name}${idSuffix}` : name;
 
@@ -317,7 +317,7 @@ function AddressFields({
             : `w-full px-4 py-4 border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
                 form.emailError
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : 'border-gray-200 focus:ring-[#090A28] focus:border-[#090A28]'
+                  : 'border-gray-200 focus:ring-[#233F31] focus:border-[#233F31]'
               }`
         }
         placeholder="Enter your email address"
@@ -374,8 +374,8 @@ function ContinueButton({
       type="submit"
       onClick={() => console.log('🔘 [Checkout] Submit button clicked (desktop)')}
       disabled={isBusy}
-      className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-white focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-xl ${
-        isBusy ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#090A28] hover:bg-[#1c2070]'
+      className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-white focus:outline-none focus:ring-4 focus:ring-[#233F31] focus:ring-offset-2 text-xl ${
+        isBusy ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#233F31] hover:bg-[#1a3025]'
       }`}
     >
       {isBusy ? (
@@ -396,7 +396,7 @@ function SecureCheckoutInfo({ mobile = false }: { mobile?: boolean }) {
   return (
     <div className={`${mobile ? 'lg:hidden mt-4 mb-4 space-y-2' : 'hidden lg:block mt-8 space-y-4'} flex flex-col items-center justify-center text-center w-full`}>
       <div className="text-sm text-gray-600">
-        <span className="font-medium text-[#090A28]">Secure Checkout</span> - SSL Encrypted
+        <span className="font-medium text-[#233F31]">Secure Checkout</span> - SSL Encrypted
       </div>
       <p className="text-xs text-gray-500 max-w-sm">
         Shop with confidence - Your payment information is protected by industry-leading encryption
@@ -414,15 +414,15 @@ function SecureCheckoutInfo({ mobile = false }: { mobile?: boolean }) {
         />
       </div>
       <div className={`flex flex-wrap items-center justify-center text-xs text-gray-500 mt-2 ${mobile ? 'gap-2 px-4' : 'gap-3'}`}>
-        <Link href="/terms" className="hover:text-[#090A28] hover:underline transition-colors">
+        <Link href="/terms" className="hover:text-[#233F31] hover:underline transition-colors">
           Terms of Service
         </Link>
         <span className="text-gray-300">•</span>
-        <Link href="/return-policy" className="hover:text-[#090A28] hover:underline transition-colors">
+        <Link href="/return-policy" className="hover:text-[#233F31] hover:underline transition-colors">
           Refund and Return Policy
         </Link>
         <span className="text-gray-300">•</span>
-        <Link href="/shipping-policy" className="hover:text-[#090A28] hover:underline transition-colors">
+        <Link href="/shipping-policy" className="hover:text-[#233F31] hover:underline transition-colors">
           Shipping Policy
         </Link>
       </div>
@@ -470,7 +470,7 @@ export default function CheckoutShippingStep({
       <CheckoutNotifier />
       <main className="flex-grow py-4">
         <div className="container mx-auto px-4">
-          <Link href={`/products/${product.slug}`} className="inline-flex items-center text-[#090A28] hover:text-[#1c2070] mb-4 text-sm">
+          <Link href={`/products/${product.slug}`} className="inline-flex items-center text-[#233F31] hover:text-[#1a3025] mb-4 text-sm">
             <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
             <span className="hidden sm:inline">Back To Product</span>
             <span className="sm:hidden">Back</span>
@@ -500,7 +500,7 @@ export default function CheckoutShippingStep({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-[#262626] text-base line-clamp-1 mb-1">{product.title}</h3>
-                    <p className="text-[#090A28] font-bold text-xl mb-1">{price}</p>
+                    <p className="text-[#233F31] font-bold text-xl mb-1">{price}</p>
                     {sellerName && (
                       <p className="mb-1 flex min-w-0 items-center gap-1.5 text-sm text-gray-600" aria-label={`Seller: ${sellerName}`}>
                         <Store className="h-4 w-4 shrink-0 text-[#262626]" aria-hidden="true" />
@@ -525,11 +525,11 @@ export default function CheckoutShippingStep({
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium text-[#090A28]">Free</span>
+                    <span className="font-medium text-[#233F31]">Free</span>
                   </div>
                   <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
                     <span className="text-base font-semibold text-[#262626]">Total</span>
-                    <span className="text-lg font-bold text-[#090A28]">{price}</span>
+                    <span className="text-lg font-bold text-[#233F31]">{price}</span>
                   </div>
                 </div>
               )}
@@ -602,7 +602,7 @@ export default function CheckoutShippingStep({
                           {product.condition}
                         </span>
                         {(product as ProductWithSelectedSize).selectedSize && (
-                          <span className="bg-[#090A28]/8 text-[#090A28] text-xs font-semibold px-2.5 py-1 rounded-full">
+                          <span className="bg-[#233F31]/8 text-[#233F31] text-xs font-semibold px-2.5 py-1 rounded-full">
                             Size: {(product as ProductWithSelectedSize).selectedSize}
                           </span>
                         )}
@@ -615,7 +615,7 @@ export default function CheckoutShippingStep({
 
                   {/* Price + remove */}
                   <div className="px-6 pb-5 flex items-center justify-between">
-                    <span className="text-xl font-bold text-[#090A28]">{price}</span>
+                    <span className="text-xl font-bold text-[#233F31]">{price}</span>
                     <button
                       type="button"
                       onClick={onClearCart}
@@ -639,7 +639,7 @@ export default function CheckoutShippingStep({
                     </div>
                     <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
                       <span className="text-sm font-semibold text-[#262626]">Total</span>
-                      <span className="text-lg font-bold text-[#090A28]">{price}</span>
+                      <span className="text-lg font-bold text-[#233F31]">{price}</span>
                     </div>
                   </div>
 

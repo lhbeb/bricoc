@@ -156,7 +156,7 @@ export default function ErrorLogPage() {
             <button
               key={t}
               onClick={() => setFilterType(t)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterType === t ? 'bg-[#090A28] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterType === t ? 'bg-[#233F31] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -168,7 +168,7 @@ export default function ErrorLogPage() {
             <button
               key={val}
               onClick={() => setFilterResolved(val)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterResolved === val ? 'bg-[#090A28] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterResolved === val ? 'bg-[#233F31] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               {label}
             </button>
@@ -289,7 +289,7 @@ export default function ErrorLogPage() {
                         value={resolveNote}
                         onChange={e => setResolveNote(e.target.value)}
                         placeholder="Optional resolution note..."
-                        className="flex-1 text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#090A28]"
+                        className="flex-1 text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#233F31]"
                       />
                       <button
                         onClick={() => markResolved(log.id, true)}

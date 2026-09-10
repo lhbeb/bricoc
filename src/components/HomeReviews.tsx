@@ -423,7 +423,7 @@ const HomeReviews: React.FC<HomeReviewsProps> = ({
                         <button
                           key={imgIndex}
                           onClick={() => setSelectedImage(img)}
-                          className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-200 group cursor-pointer hover:ring-2 ring-[#090A28] transition-all duration-200"
+                          className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-200 group cursor-pointer hover:ring-2 ring-[#233F31] transition-all duration-200"
                         >
                           <Image
                             src={img}
@@ -499,7 +499,7 @@ const HomeReviews: React.FC<HomeReviewsProps> = ({
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -512,7 +512,7 @@ const HomeReviews: React.FC<HomeReviewsProps> = ({
                     type="text"
                     value={formData.orderId}
                     onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent"
                     placeholder="Enter your order ID (optional)"
                   />
                 </div>
@@ -544,7 +544,7 @@ const HomeReviews: React.FC<HomeReviewsProps> = ({
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent"
                     placeholder="Summarize your experience"
                   />
                 </div>

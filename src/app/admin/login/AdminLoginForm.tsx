@@ -107,7 +107,7 @@ function LoginFormInner() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent transition-all"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ function LoginFormInner() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 required
-                className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent transition-all"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent transition-all"
               />
               <button
                 type="button"

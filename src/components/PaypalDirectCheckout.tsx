@@ -110,7 +110,7 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-[#090A28]/40 backdrop-blur-sm animate-in fade-in duration-300"
+        className="absolute inset-0 bg-[#233F31]/40 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={!isRedirecting ? onClose : undefined}
       />
 
@@ -145,7 +145,7 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
           <div className="mb-5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
             <div className="flex justify-between items-start mb-1">
               <h4 className="font-semibold text-gray-900 line-clamp-2 pr-4 text-sm">{product.title}</h4>
-              <span className="font-bold text-[#090A28] whitespace-nowrap text-base">
+              <span className="font-bold text-[#233F31] whitespace-nowrap text-base">
                 {currencySymbol}{product.price.toFixed(2)}
               </span>
             </div>
@@ -156,9 +156,9 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
           </div>
 
           <div className="mb-5 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#090A28]" aria-hidden="true" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#233F31]" aria-hidden="true" />
             <div className="min-w-0">
-              <p className="mb-1 text-xs font-semibold uppercase text-[#090A28]">Delivery address</p>
+              <p className="mb-1 text-xs font-semibold uppercase text-[#233F31]">Delivery address</p>
               <address className="not-italic text-sm leading-5 text-gray-700">
                 {addressLines.map((line, index) => <div key={`${index}-${line}`}>{line}</div>)}
               </address>

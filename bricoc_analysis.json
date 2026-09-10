@@ -1,0 +1,48 @@
+{
+  "totalProducts": 665,
+  "duplicateSlugsCount": 0,
+  "duplicateTitlesCount": 20,
+  "sampleDuplicateSlugs": [],
+  "sampleDuplicateTitles": [
+    {
+      "title": "2025 edge vortex v4 red",
+      "count": 2
+    },
+    {
+      "title": "dk2 5-ft x 7-ft steel utility trailer with ramp gate ( 1639-lb capacity ) 2491711",
+      "count": 2
+    },
+    {
+      "title": "2026 edge phantom 4p",
+      "count": 3
+    },
+    {
+      "title": "dk2 5-ft x 7-ft steel utility trailer with ramp gate ( 1639-lb capacity ) 2491713",
+      "count": 2
+    },
+    {
+      "title": "14×10 brockton pergola",
+      "count": 2
+    },
+    {
+      "title": "2025 edge vortex v4 vert seafoam",
+      "count": 2
+    },
+    {
+      "title": "2026 edge glyde g4",
+      "count": 2
+    },
+    {
+      "title": "2025 edge lux f4",
+      "count": 2
+    },
+    {
+      "title": "14×10 hawthorne traditional steel pergola with sail shade soft canopy",
+      "count": 2
+    },
+    {
+      "title": "14×10 stratford traditional steel pergola with sail shade soft canopy",
+      "count": 2
+    }
+  ]
+}

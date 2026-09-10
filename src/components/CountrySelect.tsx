@@ -110,7 +110,7 @@ export default function CountrySelect({
         aria-expanded={isOpen}
         className={`w-full px-4 py-3.5 sm:py-4 border-2 rounded-xl bg-white flex items-center justify-between text-left transition-all duration-200 cursor-pointer select-none ${
           isOpen
-            ? 'border-[#090A28] ring-2 ring-[#090A28]/10 shadow-md'
+            ? 'border-[#233F31] ring-2 ring-[#233F31]/10 shadow-md'
             : 'border-gray-200 hover:border-gray-300 shadow-sm'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
@@ -134,7 +134,7 @@ export default function CountrySelect({
 
         <ChevronDown
           className={`h-5 w-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? 'rotate-180 text-[#090A28]' : ''
+            isOpen ? 'rotate-180 text-[#233F31]' : ''
           }`}
         />
       </button>
@@ -158,7 +158,7 @@ export default function CountrySelect({
                 onClick={() => handleSelect(country.code)}
                 className={`w-full px-4 py-3 text-left flex items-center justify-between gap-3 text-sm sm:text-base transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-[#090A28]/5 text-[#090A28] font-bold'
+                    ? 'bg-[#233F31]/5 text-[#233F31] font-bold'
                     : 'text-[#262626] hover:bg-gray-50 font-medium'
                 }`}
               >
@@ -170,7 +170,7 @@ export default function CountrySelect({
                 </div>
 
                 {isSelected && (
-                  <Check className="h-4 w-4 text-[#090A28] flex-shrink-0" />
+                  <Check className="h-4 w-4 text-[#233F31] flex-shrink-0" />
                 )}
               </button>
             );

@@ -152,7 +152,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
 
                             {/* Confirmation message */}
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-[#090A28] text-base mb-0.5">Address Confirmed</p>
+                                <p className="font-bold text-[#233F31] text-base mb-0.5">Address Confirmed</p>
                                 <p className="text-gray-400 text-xs leading-tight">Tap To View/Hide Summary</p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
                                 <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-start space-x-3 flex-1 min-w-0">
-                                            <MapPin className="h-4 w-4 shrink-0 text-[#090A28] mt-0.5" />
+                                            <MapPin className="h-4 w-4 shrink-0 text-[#233F31] mt-0.5" />
                                             <div className="flex-grow min-w-0">
                                                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
                                                     Shipping to
@@ -189,7 +189,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
                                             type="button"
                                             onClick={onClose}
                                             title="Edit delivery address"
-                                            className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-[#090A28] hover:bg-blue-100 transition-colors duration-150"
+                                            className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-[#233F31] hover:bg-blue-100 transition-colors duration-150"
                                             aria-label="Edit delivery address"
                                         >
                                             <Pencil className="h-3.5 w-3.5" />
@@ -209,7 +209,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
                     >
                         {isLoading && (
                             <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-white rounded-2xl">
-                                <div className="w-12 h-12 border-4 border-[#090A28]/30 border-t-[#090A28] rounded-full animate-spin mb-4" />
+                                <div className="w-12 h-12 border-4 border-[#233F31]/30 border-t-[#233F31] rounded-full animate-spin mb-4" />
                                 <span className="text-base text-gray-700 font-medium">Loading payment form...</span>
                             </div>
                         )}
@@ -242,7 +242,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
                     <div className="mt-8 mb-8 sm:mt-10 flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <span className="inline-flex items-center justify-center bg-gray-100 rounded-full p-1">
-                                <svg className="h-3 w-3 sm:h-4 sm:w-4 text-[#090A28]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <svg className="h-3 w-3 sm:h-4 sm:w-4 text-[#233F31]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <rect width="18" height="12" x="3" y="8" rx="2" />
                                     <path d="M7 8V6a5 5 0 0 1 10 0v2" />
                                 </svg>
@@ -252,7 +252,7 @@ export default function KofiCheckout({ checkoutLink, shippingData, sellerName, p
                         <div className="text-gray-300">•</div>
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <span className="inline-flex items-center justify-center bg-gray-100 rounded-full p-1">
-                                <Check className="h-3 w-3 sm:h-4 sm:w-4 text-[#090A28]" />
+                                <Check className="h-3 w-3 sm:h-4 sm:w-4 text-[#233F31]" />
                             </span>
                             <span className="whitespace-nowrap">SSL Encrypted</span>
                         </div>

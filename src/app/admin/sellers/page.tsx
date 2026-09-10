@@ -79,7 +79,7 @@ export default function SellersPage() {
         </div>
         <Link
           href="/admin/sellers/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#090A28] text-white text-sm font-medium rounded-xl hover:bg-[#1c2070] transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#233F31] text-white text-sm font-medium rounded-xl hover:bg-[#1a3025] transition-all shadow-sm hover:shadow-md whitespace-nowrap"
         >
           <Plus className="h-4 w-4" />
           Add Seller
@@ -116,7 +116,7 @@ export default function SellersPage() {
               placeholder="Search by name or username…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
             />
           </div>
         </div>

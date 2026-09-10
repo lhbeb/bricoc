@@ -1,0 +1,43 @@
+{
+  "doneUrls": [
+    "https://us-honesky.com/product/lifetime-tamarack-pro-sit-on-top-kayaks/",
+    "https://us-honesky.com/product/cub-cadet-ultima-zt1-50%e2%80%b3-zero-turn-riding-lawn-mower-power-precision-comforts/",
+    "https://us-honesky.com/product/amyet-g60-peak-electric-bikes/",
+    "https://us-honesky.com/product/all-terrain-mountain-ebike-1400w-power-65mi-ranges/",
+    "https://us-honesky.com/product/honeywell-home-rth9585wf1004-wi-fi-smart-color-thermostat-7-day-programmable-touch-screen-energy-star-alexa-ready-gray/",
+    "https://us-honesky.com/product/gsky-hair-clippers-for-men-professional-beard-trimmer-kits-sets-cordless-mens-hair-trimmer-electric-shavers-haircutting-machine-with-led-display-for-barber/",
+    "https://us-honesky.com/product/mototec-mud-monster-xl-212cc-2-seat-full-suspension-go-karts/",
+    "https://us-honesky.com/product/weber-spirit-e-325-gas-grills/",
+    "https://us-honesky.com/product/aurora-fusion-lifetime-manta-10-ft-sit-on-top-angler-kayaks/",
+    "https://us-honesky.com/product/suzuki-15-hp-outboard-motor-df15as5-2/",
+    "https://us-honesky.com/product/breville-barista-express-espresso-machines/",
+    "https://us-honesky.com/product/x-pro-125cc-atv-with-reverse-electriic-start-luggage-rack-led-headlight/",
+    "https://us-honesky.com/product/kitty-city-outdoor-catio-furniture-and-play-kits-for-cats-outdoor-mega-kit/",
+    "https://us-honesky.com/product/bestway-apx-365-18x52%e2%80%b3-round-above-ground-swimming-pool-set-with-pump-ladders/",
+    "https://us-honesky.com/product/pioneer-dj-ddj-rev7-dj-controllerss/"
+  ],
+  "failedUrls": [],
+  "lastPage": 1,
+  "stats": {
+    "success": 15,
+    "failed": 0,
+    "skipped": 0
+  },
+  "allProductUrls": [
+    "https://us-honesky.com/product/lifetime-tamarack-pro-sit-on-top-kayaks/",
+    "https://us-honesky.com/product/cub-cadet-ultima-zt1-50%e2%80%b3-zero-turn-riding-lawn-mower-power-precision-comforts/",
+    "https://us-honesky.com/product/amyet-g60-peak-electric-bikes/",
+    "https://us-honesky.com/product/all-terrain-mountain-ebike-1400w-power-65mi-ranges/",
+    "https://us-honesky.com/product/honeywell-home-rth9585wf1004-wi-fi-smart-color-thermostat-7-day-programmable-touch-screen-energy-star-alexa-ready-gray/",
+    "https://us-honesky.com/product/gsky-hair-clippers-for-men-professional-beard-trimmer-kits-sets-cordless-mens-hair-trimmer-electric-shavers-haircutting-machine-with-led-display-for-barber/",
+    "https://us-honesky.com/product/mototec-mud-monster-xl-212cc-2-seat-full-suspension-go-karts/",
+    "https://us-honesky.com/product/weber-spirit-e-325-gas-grills/",
+    "https://us-honesky.com/product/aurora-fusion-lifetime-manta-10-ft-sit-on-top-angler-kayaks/",
+    "https://us-honesky.com/product/suzuki-15-hp-outboard-motor-df15as5-2/",
+    "https://us-honesky.com/product/breville-barista-express-espresso-machines/",
+    "https://us-honesky.com/product/x-pro-125cc-atv-with-reverse-electriic-start-luggage-rack-led-headlight/",
+    "https://us-honesky.com/product/kitty-city-outdoor-catio-furniture-and-play-kits-for-cats-outdoor-mega-kit/",
+    "https://us-honesky.com/product/bestway-apx-365-18x52%e2%80%b3-round-above-ground-swimming-pool-set-with-pump-ladders/",
+    "https://us-honesky.com/product/pioneer-dj-ddj-rev7-dj-controllerss/"
+  ]
+}

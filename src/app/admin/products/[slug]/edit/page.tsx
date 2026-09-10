@@ -55,8 +55,8 @@ function Section({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
       >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-[#090A28]/10' : 'bg-gray-100'}`}>
-          <Icon className={`h-5 w-5 ${isOpen ? 'text-[#090A28]' : 'text-gray-500'}`} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-[#233F31]/10' : 'bg-gray-100'}`}>
+          <Icon className={`h-5 w-5 ${isOpen ? 'text-[#233F31]' : 'text-gray-500'}`} />
         </div>
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
@@ -440,7 +440,7 @@ export default function EditProductPage() {
         <div className="text-center py-16">
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">Product not found</p>
-          <Link href={returnTo} className="text-[#090A28] hover:underline">← Back to products</Link>
+          <Link href={returnTo} className="text-[#233F31] hover:underline">← Back to products</Link>
         </div>
       </AdminLayout>
     );
@@ -510,7 +510,7 @@ export default function EditProductPage() {
             <button
               onClick={handleSubmit}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white text-sm font-medium rounded-xl hover:bg-[#1c2070] disabled:opacity-50 shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#233F31] text-white text-sm font-medium rounded-xl hover:bg-[#1a3025] disabled:opacity-50 shadow-sm"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? 'Saving...' : 'Save'}
@@ -549,7 +549,7 @@ export default function EditProductPage() {
                     onChange={(e) => updateField('price', e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                   />
                 </div>
               </Field>
@@ -564,7 +564,7 @@ export default function EditProductPage() {
                     value={formData.original_price}
                     onChange={(e) => updateField('original_price', e.target.value)}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                   />
                 </div>
               </Field>
@@ -573,7 +573,7 @@ export default function EditProductPage() {
                 <select
                   value={formData.currency}
                   onChange={(e) => updateField('currency', e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -608,7 +608,7 @@ export default function EditProductPage() {
                     }));
                     setHasChanges(true);
                   }}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                 >
                   {MARKET_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -635,7 +635,7 @@ export default function EditProductPage() {
                         updateField('checkout_links', [formData.checkout_link || '']);
                       }
                     }}
-                    className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                    className="h-5 w-5 rounded border-gray-300 text-[#233F31] focus:ring-[#233F31] outline-none transition-all cursor-pointer"
                   />
                   <label htmlFor="rotate_links" className="text-sm font-semibold text-gray-700 cursor-pointer">
                     Enable Checkout Link Rotation (Load Distribution)
@@ -650,7 +650,7 @@ export default function EditProductPage() {
                     value={formData.checkout_link}
                     onChange={(e) => updateField('checkout_link', e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                   />
                 </Field>
               ) : (
@@ -667,7 +667,7 @@ export default function EditProductPage() {
                           updateField('checkout_links', newLinks);
                         }}
                         placeholder={`https://checkout-link-${idx + 1}`}
-                        className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                        className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                         required
                       />
                       {(formData.checkout_links || ['']).length > 1 && (
@@ -689,7 +689,7 @@ export default function EditProductPage() {
                     onClick={() => {
                       updateField('checkout_links', [...(formData.checkout_links || ['']), '']);
                     }}
-                    className="flex items-center gap-1.5 text-xs font-bold text-[#090A28] hover:text-[#0a3075] bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-sm transition-all"
+                    className="flex items-center gap-1.5 text-xs font-bold text-[#233F31] hover:text-[#0a3075] bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-sm transition-all"
                   >
                     <Plus className="h-3 w-3" /> Add checkout link
                   </button>
@@ -702,7 +702,7 @@ export default function EditProductPage() {
                 <select
                   value={formData.checkout_flow}
                   onChange={(e) => updateField('checkout_flow', e.target.value as CheckoutFlow)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                   required
                 >
                   <option value="buymeacoffee">BuyMeACoffee (External - Redirects to payment link)</option>
@@ -771,7 +771,7 @@ export default function EditProductPage() {
                   onChange={(e) => {
                     updateField('has_mens_sizes', e.target.checked);
                   }}
-                  className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                  className="h-5 w-5 rounded border-gray-300 text-[#233F31] focus:ring-[#233F31] outline-none transition-all cursor-pointer"
                 />
                 <label htmlFor="has_mens_sizes" className="text-sm font-semibold text-gray-700 cursor-pointer">
                   Enable Men&apos;s Sizing Range
@@ -786,7 +786,7 @@ export default function EditProductPage() {
                       value={formData.sizes_mens}
                       onChange={(e) => updateField('sizes_mens', e.target.value)}
                       placeholder="e.g. UK 6, UK 7, UK 8, UK 9"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                       required={formData.has_mens_sizes}
                     />
                   </Field>
@@ -804,7 +804,7 @@ export default function EditProductPage() {
                   onChange={(e) => {
                     updateField('has_womens_sizes', e.target.checked);
                   }}
-                  className="h-5 w-5 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28] outline-none transition-all cursor-pointer"
+                  className="h-5 w-5 rounded border-gray-300 text-[#233F31] focus:ring-[#233F31] outline-none transition-all cursor-pointer"
                 />
                 <label htmlFor="has_womens_sizes" className="text-sm font-semibold text-gray-700 cursor-pointer">
                   Enable Women&apos;s Sizing Range
@@ -819,7 +819,7 @@ export default function EditProductPage() {
                       value={formData.sizes_womens}
                       onChange={(e) => updateField('sizes_womens', e.target.value)}
                       placeholder="e.g. UK 4, UK 5, UK 6, UK 7"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                       required={formData.has_womens_sizes}
                     />
                   </Field>
@@ -838,7 +838,7 @@ export default function EditProductPage() {
               <select
                 value={formData.listed_by}
                 onChange={(e) => updateField('listed_by', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                 required
               >
                 <option value="">Select a user</option>
@@ -858,7 +858,7 @@ export default function EditProductPage() {
               <select
                 value={formData.seller_id}
                 onChange={(e) => updateField('seller_id', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
               >
                 <option value="">Unassigned (Fallback: Bricoc)</option>
                 {sellers.map((s) => (
@@ -880,7 +880,7 @@ export default function EditProductPage() {
                 value={formData.title}
                 onChange={(e) => updateField('title', e.target.value)}
                 placeholder="Enter product title"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 required
               />
             </Field>
@@ -893,7 +893,7 @@ export default function EditProductPage() {
                   value={formData.slug}
                   onChange={(e) => { setSlugDirty(true); updateField('slug', slugify(e.target.value)); }}
                   placeholder="product-url"
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 />
               </div>
             </Field>
@@ -904,7 +904,7 @@ export default function EditProductPage() {
                 onChange={(e) => updateField('description', e.target.value)}
                 placeholder="Describe the product..."
                 rows={4}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all resize-none"
               />
             </Field>
 
@@ -915,7 +915,7 @@ export default function EditProductPage() {
                   value={formData.brand}
                   onChange={(e) => updateField('brand', e.target.value)}
                   placeholder="Brand"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 />
               </Field>
               <Field label="Category">
@@ -924,14 +924,14 @@ export default function EditProductPage() {
                   value={formData.category}
                   onChange={(e) => updateField('category', e.target.value)}
                   placeholder="Category"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 />
               </Field>
               <Field label="Condition">
                 <select
                   value={formData.condition}
                   onChange={(e) => updateField('condition', e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all bg-white"
                 >
                   <option value="">Select</option>
                   {PRODUCT_CONDITIONS.map((c) => (
@@ -957,7 +957,7 @@ export default function EditProductPage() {
                           updateField('collections', formData.collections.filter(c => c !== collection.value));
                         }
                       }}
-                      className="w-4 h-4 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28]"
+                      className="w-4 h-4 rounded border-gray-300 text-[#233F31] focus:ring-[#233F31]"
                     />
                     <span className="text-sm text-gray-700">{collection.label}</span>
                   </label>
@@ -997,7 +997,7 @@ export default function EditProductPage() {
             onUploadStatusChange={setUploadStatus}
           />
           {uploadStatus.message && (
-            <p className={`mt-3 text-sm ${uploadStatus.uploading ? 'text-[#090A28]' : 'text-gray-500'}`}>
+            <p className={`mt-3 text-sm ${uploadStatus.uploading ? 'text-[#233F31]' : 'text-gray-500'}`}>
               {uploadStatus.message}
             </p>
           )}
@@ -1012,7 +1012,7 @@ export default function EditProductPage() {
                 step="0.1"
                 value={formData.rating}
                 onChange={(e) => updateField('rating', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
               />
             </Field>
             <Field label="Review Count" hint="Displayed review count">
@@ -1021,7 +1021,7 @@ export default function EditProductPage() {
                 min="0"
                 value={formData.review_count}
                 onChange={(e) => updateField('review_count', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
               />
             </Field>
           </div>
@@ -1041,7 +1041,7 @@ export default function EditProductPage() {
                   value={formData.metaTitle}
                   onChange={(e) => updateField('metaTitle', e.target.value)}
                   placeholder={formData.title || 'Page title'}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 />
               </Field>
               <Field label="Meta Description" hint={`${formData.metaDescription.length}/160 characters`}>
@@ -1050,7 +1050,7 @@ export default function EditProductPage() {
                   onChange={(e) => updateField('metaDescription', e.target.value)}
                   placeholder="Brief description for search results"
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all resize-none"
                 />
               </Field>
               <Field label="Keywords" hint="Comma separated">
@@ -1059,7 +1059,7 @@ export default function EditProductPage() {
                   value={formData.metaKeywords}
                   onChange={(e) => updateField('metaKeywords', e.target.value)}
                   placeholder="keyword1, keyword2, keyword3"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none transition-all"
                 />
               </Field>
             </div>
@@ -1071,14 +1071,14 @@ export default function EditProductPage() {
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="OG Title">
-                  <input type="text" value={formData.metaOgTitle} onChange={(e) => updateField('metaOgTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                  <input type="text" value={formData.metaOgTitle} onChange={(e) => updateField('metaOgTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none" />
                 </Field>
                 <Field label="OG Image URL">
-                  <input type="url" value={formData.metaOgImage} onChange={(e) => updateField('metaOgImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                  <input type="url" value={formData.metaOgImage} onChange={(e) => updateField('metaOgImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none" />
                 </Field>
               </div>
               <Field label="OG Description">
-                <textarea value={formData.metaOgDescription} onChange={(e) => updateField('metaOgDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
+                <textarea value={formData.metaOgDescription} onChange={(e) => updateField('metaOgDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none resize-none" />
               </Field>
             </div>
 
@@ -1089,14 +1089,14 @@ export default function EditProductPage() {
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Twitter Title">
-                  <input type="text" value={formData.metaTwitterTitle} onChange={(e) => updateField('metaTwitterTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                  <input type="text" value={formData.metaTwitterTitle} onChange={(e) => updateField('metaTwitterTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none" />
                 </Field>
                 <Field label="Twitter Image URL">
-                  <input type="url" value={formData.metaTwitterImage} onChange={(e) => updateField('metaTwitterImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
+                  <input type="url" value={formData.metaTwitterImage} onChange={(e) => updateField('metaTwitterImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none" />
                 </Field>
               </div>
               <Field label="Twitter Description">
-                <textarea value={formData.metaTwitterDescription} onChange={(e) => updateField('metaTwitterDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
+                <textarea value={formData.metaTwitterDescription} onChange={(e) => updateField('metaTwitterDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#233F31] focus:border-[#233F31] outline-none resize-none" />
               </Field>
             </div>
           </div>
