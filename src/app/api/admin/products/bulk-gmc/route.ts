@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { jwtVerify } from 'jose';
 import { shouldBypassAuth } from '@/lib/supabase/auth';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { isRevokedAdminEmail } from '@/lib/admin-access';
 
 const MAX_PRODUCTS_PER_REQUEST = 2000;
 const QUERY_BATCH_SIZE = 100;
@@ -25,7 +26,7 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
       process.env.JWT_SECRET || 'your-secret-key-change-in-production',
     );
     const { payload } = await jwtVerify(token, secret);
-    return payload.isActive === true;
+    return payload.isActive === true && !isRevokedAdminEmail(payload.email as string | undefined);
   } catch {
     return false;
   }

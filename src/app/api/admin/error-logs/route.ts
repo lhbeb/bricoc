@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { isRevokedAdminEmail } from '@/lib/admin-access';
 
 async function getAdminAuth(req: NextRequest) {
   const authHeader = req.headers.get('Authorization');
@@ -16,6 +17,9 @@ async function getAdminAuth(req: NextRequest) {
     const { payload } = await jwtVerify(token, secretKey);
     const decoded = payload as { role: string; isActive: boolean; email: string };
     const normalizedRole = decoded.role?.toUpperCase();
+
+    if (isRevokedAdminEmail(decoded.email)) return null;
+
 
     if (!decoded.isActive) return null;
     if (!['SUPER_ADMIN', 'REGULAR_ADMIN', 'ADMIN'].includes(normalizedRole)) return null;

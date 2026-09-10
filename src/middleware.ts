@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { isRevokedAdminEmail } from '@/lib/admin-access';
 
 // JWT secret - must match the one in login route
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -58,6 +59,17 @@ export async function middleware(request: NextRequest) {
 
       console.log('✅ [MIDDLEWARE] Token verified for:', decoded.email);
 
+      if (isRevokedAdminEmail(decoded.email)) {
+        const url = new URL('/admin/login', request.url);
+        url.searchParams.set('error', 'Admin access has been revoked');
+        const response = NextResponse.redirect(url);
+        response.cookies.delete('admin_token');
+        response.cookies.delete('admin_role');
+        response.cookies.delete('admin_email');
+        response.cookies.delete('is_special_admin');
+        return response;
+      }
+
       // Check if admin is active
       if (!decoded.isActive) {
         console.log('🚫 [MIDDLEWARE] Admin account is deactivated');
@@ -68,23 +80,6 @@ export async function middleware(request: NextRequest) {
         response.cookies.delete('admin_role');
         response.cookies.delete('admin_email');
         return response;
-      }
-
-      // Special restricted admin: amine@bricoc.com only has access to:
-      // 1) Listed products (/admin/products)
-      // 2) Orders (/admin/orders)
-      // 3) Payment settings (/admin/payment-settings)
-      if (decoded.email?.toLowerCase() === 'amine@bricoc.com') {
-        const isAllowedPath =
-          pathname === '/admin/products' ||
-          pathname === '/admin/orders' ||
-          pathname.startsWith('/admin/orders/') ||
-          pathname === '/admin/payment-settings';
-
-        if (!isAllowedPath) {
-          console.log(`🚫 [MIDDLEWARE] Restricted admin ${decoded.email} blocked from ${pathname} -> redirecting to /admin/products`);
-          return NextResponse.redirect(new URL('/admin/products', request.url));
-        }
       }
 
       // Authenticated admin, allow access

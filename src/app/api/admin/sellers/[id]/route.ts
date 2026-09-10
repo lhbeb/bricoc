@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSellerById, updateSeller, deleteSeller } from '@/lib/supabase/sellers';
+import { isRevokedAdminEmail } from '@/lib/admin-access';
 
 // Helper to get auth from request
 async function getAdminAuth(request: NextRequest) {
@@ -24,6 +25,9 @@ async function getAdminAuth(request: NextRequest) {
         role: string;
         isActive: boolean;
       };
+
+      if (isRevokedAdminEmail(decoded.email)) return null;
+
 
       if (!decoded.isActive) {
         return null;

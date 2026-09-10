@@ -48,9 +48,6 @@ function getAdminEmails(): string[] {
     : ['elmahboubimehdi@gmail.com'];
 
   // Ensure hardcoded admin emails are always recognized
-  if (!list.includes('amine@bricoc.com')) {
-    list.push('amine@bricoc.com');
-  }
   if (!list.includes('matrix01mehdi@gmail.com')) {
     list.push('matrix01mehdi@gmail.com');
   }
@@ -58,7 +55,7 @@ function getAdminEmails(): string[] {
     list.push('elmahboubimehdi@gmail.com');
   }
 
-  return list;
+  return list.filter(email => email !== 'amine@bricoc.com');
 }
 
 /**

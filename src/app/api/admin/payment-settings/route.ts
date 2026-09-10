@@ -5,6 +5,7 @@ import {
     invalidatePaypalConfigCache,
     invalidateStripeConfigCache,
 } from '@/lib/supabase/payment-settings';
+import { isRevokedAdminEmail } from '@/lib/admin-access';
 import {
     invalidatePaypalAccessTokenCache,
     PaypalApiError,
@@ -28,6 +29,9 @@ async function getAdminAuth(request: NextRequest) {
             const { payload } = await jwtVerify(token, getSecretKey());
             const decoded = payload as { role: string; isActive: boolean; email: string };
             const normalizedRole = decoded.role?.toUpperCase();
+
+            if (isRevokedAdminEmail(decoded.email)) return null;
+
 
             if (!decoded.isActive) return null;
             if (!['SUPER_ADMIN', 'REGULAR_ADMIN', 'ADMIN'].includes(normalizedRole)) return null;
