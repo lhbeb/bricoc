@@ -99,6 +99,20 @@ export default function RootLayout({
         <meta name="google-site-verification" content="xZPm3vNPMEKLJxsoCDxFrS9Sa17QOZfn8t_Xol3Tyfk" />
         {/* Pinterest Domain Verification */}
         <meta name="p:domain_verify" content="1005fd41bbe483406bb3d79510b3e9ed" />
+        
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18441617346"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-18441617346');
+            `,
+          }}
+        />
+
         {/* Meta Pixel base snippet */}
         <script
           dangerouslySetInnerHTML={{
