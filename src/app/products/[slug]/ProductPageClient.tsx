@@ -514,7 +514,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       priority
                       quality={PRODUCT_IMAGE_QUALITY}
                       sizes="(max-width: 1024px) 100vw, 50vw"
-                      className={`object-cover rounded-md transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      className={`object-contain rounded-md transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onError={(e) => {
                         console.error('Image failed to load:', images[activeImage]);
                         (e.target as HTMLImageElement).src = '/placeholder.png';
@@ -546,7 +546,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           fill
                           quality={90}
                           sizes="80px"
-                          className="object-cover"
+                          className="object-contain"
                           onError={(e) => {
                             console.error('Thumbnail failed to load:', image);
                             (e.target as HTMLImageElement).src = '/placeholder.png';
