@@ -109,7 +109,8 @@ export async function sendOrderEmail(order: any): Promise<{ success: boolean; er
     // Format checkout flow for display
     const formatCheckoutFlow = (flow: string): string => {
       const flowMap: Record<string, string> = {
-        'stripe': 'Stripe',
+        'stripe': 'Stripe Embedded',
+        'stripe-hosted': 'Stripe Hosted Checkout',
         'kofi': 'Ko-fi',
         'buymeacoffee': 'Buy Me a Coffee',
         'external': 'External',

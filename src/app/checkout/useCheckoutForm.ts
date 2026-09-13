@@ -74,7 +74,7 @@ export function useCheckoutForm(product?: Product | null) {
   const isKofi = product?.checkoutFlow === 'kofi';
   const requiresCountry = usesCountryFirstAddress(product?.checkoutFlow);
   // Ko-fi collects buyer name in Phase 2 (payment processor), so skip it in Phase 1
-  const requiresFullName = product?.checkoutFlow === 'stripe' || (requiresCountry && !isKofi);
+  const requiresFullName = product?.checkoutFlow === 'stripe' || product?.checkoutFlow === 'stripe-hosted' || (requiresCountry && !isKofi);
 
   // When the product loads, set the default country based on its market/currency,
   // then refine it from the visitor's location when available.

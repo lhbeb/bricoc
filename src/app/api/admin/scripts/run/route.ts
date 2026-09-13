@@ -452,7 +452,7 @@ export async function POST(request: NextRequest) {
                 const fromFlow = params.fromFlow || 'all';
                 const toFlow = params.toFlow;
 
-                const validFlows = ['buymeacoffee', 'stripe', 'kofi', 'external', 'paypal-invoice', 'paypal-unclaimed', 'paypal-direct', 'paypal-api'];
+                const validFlows = ['buymeacoffee', 'stripe', 'stripe-hosted', 'kofi', 'external', 'paypal-invoice', 'paypal-unclaimed', 'paypal-direct', 'paypal-api'];
                 if (!toFlow || !validFlows.includes(toFlow)) {
                     return NextResponse.json(
                         { error: `toFlow must be one of: ${validFlows.join(', ')}` },

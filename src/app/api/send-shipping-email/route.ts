@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     const requiresCountry = usesCountryFirstAddress(checkoutFlow);
     const shippingData = requiresCountry ? normalizeShippingData(rawShippingData) : rawShippingData;
 
-    if (checkoutFlow === 'stripe') {
+    if (checkoutFlow === 'stripe' || checkoutFlow === 'stripe-hosted') {
       if (typeof shippingData.fullName !== 'string' || !shippingData.fullName.trim()) {
         return NextResponse.json({ error: 'Please enter your full name.' }, { status: 400 });
       }
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       shippingCountry: shippingData.country,
       shippingCountryCode: shippingData.countryCode,
       checkoutFlow,
-      status: checkoutFlow === 'stripe' || checkoutFlow === 'paypal-direct' || checkoutFlow === 'paypal-api'
+      status: checkoutFlow === 'stripe' || checkoutFlow === 'stripe-hosted' || checkoutFlow === 'paypal-direct' || checkoutFlow === 'paypal-api'
         ? 'pending_payment'
         : 'completed',
       paymentProvider: checkoutFlow,

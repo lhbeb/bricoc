@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         // Bind the Stripe session to the exact order created by this checkout.
         // This prevents unrelated paid sessions from being used as proof of payment.
         if (
-            order.checkout_flow !== 'stripe' ||
+            !['stripe', 'stripe-hosted'].includes(order.checkout_flow) ||
             !order.stripe_checkout_session_id ||
             order.stripe_checkout_session_id !== session.id
         ) {

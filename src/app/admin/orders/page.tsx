@@ -844,7 +844,8 @@ export default function AdminOrdersPage() {
                         </span>
                       )}
                       {(() => {
-                        const isStripeFlow = order.payment_provider === 'stripe' || order.product_checkout_flow === 'stripe';
+                        const isStripeFlow = ['stripe', 'stripe-hosted'].includes(order.payment_provider || '')
+                          || ['stripe', 'stripe-hosted'].includes(order.product_checkout_flow || '');
                         if (!isStripeFlow) return null;
                         
                         if (order.status === 'paid') return (
@@ -903,7 +904,8 @@ export default function AdminOrdersPage() {
                         const flow = order.product_checkout_flow;
                         if (!flow) return null;
                         const flowLabels: Record<string, { label: string; color: string }> = {
-                          'stripe': { label: '💳 Stripe', color: 'bg-violet-100 text-violet-700' },
+                          'stripe': { label: '💳 Stripe Embedded', color: 'bg-violet-100 text-violet-700' },
+                          'stripe-hosted': { label: '💳 Stripe Hosted', color: 'bg-indigo-100 text-indigo-700' },
                           'kofi': { label: '☕ Ko-fi', color: 'bg-yellow-100 text-yellow-700' },
                           'buymeacoffee': { label: '☕ Buy Me a Coffee', color: 'bg-amber-100 text-amber-700' },
                           'external': { label: '🔗 External', color: 'bg-gray-100 text-gray-600' },
@@ -996,7 +998,8 @@ export default function AdminOrdersPage() {
                       </h4>
                       <div className="space-y-2">
                          {(() => {
-                            const isStripeFlow = order.payment_provider === 'stripe' || order.product_checkout_flow === 'stripe';
+                            const isStripeFlow = ['stripe', 'stripe-hosted'].includes(order.payment_provider || '')
+                              || ['stripe', 'stripe-hosted'].includes(order.product_checkout_flow || '');
                             if (!isStripeFlow) return null;
                             return (
                               <div className="flex flex-col gap-1">

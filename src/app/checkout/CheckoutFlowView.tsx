@@ -4,6 +4,7 @@ import { Check, Mail, MapPin } from 'lucide-react';
 import KofiCheckout from '@/components/KofiCheckout';
 import PaypalDirectCheckout from '@/components/PaypalDirectCheckout';
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
+import StripeEmbeddedCheckout from '@/components/StripeEmbeddedCheckout';
 import type { Product } from '@/types/product';
 import type { ShippingData } from './types';
 
@@ -11,6 +12,7 @@ interface CheckoutFlowViewProps {
   product: Product;
   shippingData: ShippingData;
   sellerName: string | null;
+  stripeClientSecret: string | null;
   showKofiCheckout: boolean;
   assignedCheckoutLink: string | null;
   showPaypalConfirmation: boolean;
@@ -21,6 +23,7 @@ interface CheckoutFlowViewProps {
   showPaypalDirect: boolean;
   paypalDirectEmail: string;
   paypalDirectOrderId: string | null;
+  onStripeBack: () => void;
   onKofiClose: () => void;
   onPaypalConfirmationClose: () => void;
   onPaypalDirectClose: () => void;
@@ -97,6 +100,7 @@ export default function CheckoutFlowView({
   product,
   shippingData,
   sellerName,
+  stripeClientSecret,
   showKofiCheckout,
   assignedCheckoutLink,
   showPaypalConfirmation,
@@ -107,10 +111,27 @@ export default function CheckoutFlowView({
   showPaypalDirect,
   paypalDirectEmail,
   paypalDirectOrderId,
+  onStripeBack,
   onKofiClose,
   onPaypalConfirmationClose,
   onPaypalDirectClose,
 }: CheckoutFlowViewProps) {
+  if (stripeClientSecret) {
+    return (
+      <StripeEmbeddedCheckout
+        clientSecret={stripeClientSecret}
+        shippingData={shippingData}
+        product={{
+          title: product.title,
+          price: product.price,
+          currency: product.currency,
+          images: product.images,
+        }}
+        onBack={onStripeBack}
+      />
+    );
+  }
+
   if (showKofiCheckout) {
     return (
       <KofiCheckout

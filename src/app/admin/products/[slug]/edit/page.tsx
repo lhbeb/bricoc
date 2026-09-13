@@ -23,7 +23,7 @@ import AdminSellerReviewsEditor from '@/components/AdminSellerReviewsEditor';
 const slugify = (value: string) =>
   value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-type CheckoutFlow = 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct' | 'paypal-api' | 'lemon-squeezy';
+type CheckoutFlow = 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'stripe-hosted' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct' | 'paypal-api' | 'lemon-squeezy';
 const ROTATABLE_CHECKOUT_FLOWS: CheckoutFlow[] = ['buymeacoffee', 'kofi', 'external'];
 const supportsCheckoutLinkRotation = (flow: CheckoutFlow) => ROTATABLE_CHECKOUT_FLOWS.includes(flow);
 
@@ -707,7 +707,8 @@ export default function EditProductPage() {
                 >
                   <option value="buymeacoffee">BuyMeACoffee (External - Redirects to payment link)</option>
                   <option value="kofi">Ko-fi (Iframe - Embedded on your site)</option>
-                  <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
+                  <option value="stripe">Stripe Embedded Checkout (On-site payment form)</option>
+                  <option value="stripe-hosted">Stripe Hosted Checkout (Redirect to checkout.stripe.com)</option>
                   <option value="external">External (Custom payment provider)</option>
                   <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
                   <option value="paypal-unclaimed">PayPal Unclaimed (Same as invoice flow for now)</option>
@@ -722,7 +723,11 @@ export default function EditProductPage() {
                       </>
                     ) : formData.checkout_flow === 'stripe' ? (
                       <>
-                        <strong>Stripe:</strong> Customer is redirected to Stripe&apos;s secure hosted checkout page. Uses the active Stripe keys from Payment Settings.
+                        <strong>Stripe Embedded:</strong> Customer completes payment in Stripe&apos;s embedded form on Bricoc.
+                      </>
+                    ) : formData.checkout_flow === 'stripe-hosted' ? (
+                      <>
+                        <strong>Stripe Hosted:</strong> Customer is redirected to checkout.stripe.com and returns after payment.
                       </>
                     ) : formData.checkout_flow === 'external' ? (
                       <>

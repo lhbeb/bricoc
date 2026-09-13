@@ -34,6 +34,7 @@ const CheckoutPage: React.FC = () => {
   const [paypalConfirmationVariant, setPaypalConfirmationVariant] = useState<'invoice' | 'unclaimed'>('invoice');
   const [paypalConfirmationOrderId, setPaypalConfirmationOrderId] = useState<string | null>(null);
   const [showPaypalDirect, setShowPaypalDirect] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   const [assignedCheckoutLink, setAssignedCheckoutLink] = useState<string | null>(null);
   const [paypalDirectOrderId, setPaypalDirectOrderId] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState('');
@@ -448,22 +449,41 @@ const CheckoutPage: React.FC = () => {
         console.log('🎨 [Checkout] Ko-fi flow: Showing iframe');
         setShowKofiCheckout(true);
       } else if (checkoutFlow === 'stripe') {
-        console.log('💳 [Checkout] Stripe flow: Creating Hosted Checkout Session');
+        console.log('💳 [Checkout] Stripe flow: Creating Embedded Checkout Session');
         try {
-          setIsRedirecting(true);
-          window.scrollTo({ top: 0 });
-
           const response = await fetch('/api/create-stripe-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId, product, shippingData: form.shippingData }),
           });
           const data = await response.json();
-          if (response.ok && data.url) {
-            console.log('🔄 [Checkout] Redirecting to Stripe hosted checkout');
-            window.location.assign(data.url);
+          if (data.clientSecret) {
+            setStripeClientSecret(data.clientSecret);
           } else {
             console.error('❌ [Checkout] Stripe session creation failed:', data);
+            setCheckoutError(data.error || 'Failed to initialize payment. Please try again.');
+          }
+        } catch (error) {
+          console.error('❌ [Checkout] Failed connecting to Stripe:', error);
+          setCheckoutError('Could not connect to payment provider. Please check your connection and try again.');
+        }
+      } else if (checkoutFlow === 'stripe-hosted') {
+        console.log('💳 [Checkout] Stripe Hosted flow: Creating Hosted Checkout Session');
+        try {
+          setIsRedirecting(true);
+          window.scrollTo({ top: 0 });
+
+          const response = await fetch('/api/create-stripe-hosted-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, product, shippingData: form.shippingData }),
+          });
+          const data = await response.json();
+
+          if (response.ok && data.url) {
+            window.location.assign(data.url);
+          } else {
+            console.error('❌ [Checkout] Stripe hosted session creation failed:', data);
             setIsRedirecting(false);
             setCheckoutError(data.error || 'Failed to initialize payment. Please try again.');
           }
@@ -545,6 +565,7 @@ const CheckoutPage: React.FC = () => {
   }
 
   const hasActiveCheckoutFlow = Boolean(
+    stripeClientSecret ||
     showKofiCheckout ||
     showPaypalConfirmation ||
     isRedirecting ||
@@ -557,6 +578,7 @@ const CheckoutPage: React.FC = () => {
         product={cartItem.product}
         shippingData={form.shippingData}
         sellerName={sellerName}
+        stripeClientSecret={stripeClientSecret}
         showKofiCheckout={showKofiCheckout}
         assignedCheckoutLink={assignedCheckoutLink}
         showPaypalConfirmation={showPaypalConfirmation}
@@ -567,6 +589,10 @@ const CheckoutPage: React.FC = () => {
         showPaypalDirect={showPaypalDirect}
         paypalDirectEmail={paypalDirectEmail}
         paypalDirectOrderId={paypalDirectOrderId}
+        onStripeBack={() => {
+          setStripeClientSecret(null);
+          setCheckoutError('');
+        }}
         onKofiClose={() => {
           setShowKofiCheckout(false);
         }}

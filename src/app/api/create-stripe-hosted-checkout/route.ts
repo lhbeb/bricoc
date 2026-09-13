@@ -121,7 +121,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Get the base URL for the embedded Checkout return page.
+        if (order.checkout_flow !== 'stripe-hosted') {
+            return NextResponse.json(
+                { error: 'This order is not configured for Stripe Hosted Checkout.' },
+                { status: 400 }
+            );
+        }
+
+        // Use Bricoc's trusted production origin for Stripe's return URLs.
         const origin = process.env.NODE_ENV === 'development'
             ? request.nextUrl.origin
             : resolveBaseUrl();
@@ -135,20 +142,18 @@ export async function POST(request: NextRequest) {
         };
         const orderReference = order.order_number ? `#${order.order_number}` : orderId;
 
-        // Create an embedded Stripe Checkout Session with expiration.
-        // The delivery address is already collected and saved in our checkout flow,
-        // so do not enable shipping_address_collection here. Asking again in Stripe
-        // adds friction and can lower conversion.
+        // Create a Stripe-hosted Checkout Session. The delivery address was already
+        // collected and saved on Bricoc, so the hosted page only needs payment data.
         // NOTE: price/currency/title come from the DATABASE, not the client.
         const session = await stripe.checkout.sessions.create({
-            ui_mode: 'embedded',
             payment_method_types: ['card'],
             line_items: [
                 {
                     price_data: {
                         currency: dbProduct.currency?.toLowerCase() || 'usd',
                         product_data: {
-                            name: `Bricoc order - ${orderReference}`,
+                            name: dbProduct.title,
+                            description: `Bricoc order ${orderReference}`,
                             images: dbProduct.images && dbProduct.images.length > 0 ? [dbProduct.images[0]] : undefined,
                         },
                         unit_amount: Math.round(dbProduct.price * 100), // Stripe expects amount in cents
@@ -157,7 +162,9 @@ export async function POST(request: NextRequest) {
                 },
             ],
             mode: 'payment',
-            return_url: `${origin}/thankyou?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${origin}/thankyou?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}/checkout?payment=cancelled&provider=stripe-hosted`,
+            client_reference_id: orderId,
             customer_email: shippingData.email,
             payment_intent_data: {
                 shipping: {
@@ -191,8 +198,12 @@ export async function POST(request: NextRequest) {
             throw new Error('Failed to link Stripe session to order');
         }
 
+        if (!session.url) {
+            throw new Error('Stripe did not return a hosted Checkout URL');
+        }
+
         return NextResponse.json({
-            clientSecret: session.client_secret,
+            url: session.url,
             sessionId: session.id
         });
     } catch (error: any) {
