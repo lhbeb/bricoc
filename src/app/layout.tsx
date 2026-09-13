@@ -101,18 +101,18 @@ export default function RootLayout({
         {/* Pinterest Domain Verification */}
         <meta name="p:domain_verify" content="1005fd41bbe483406bb3d79510b3e9ed" />
         
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18441617346"></script>
+        {/* Google tag (gtag.js) - loaded with afterInteractive strategy via Script component below */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'AW-18441617346');
+              gtag('config', 'AW-18441617346', { send_page_view: false });
             `,
           }}
         />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18441617346"></script>
 
         {/* Meta Pixel base snippet */}
         <script
