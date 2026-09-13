@@ -60,6 +60,52 @@ const SCRIPTS: ScriptCard[] = [
         },
     },
     {
+        id: 'fix-checkout-flow-constraint',
+        name: '🔧 Fix Checkout Flow Constraint + Bulk Switch',
+        description:
+            'Fixes the Supabase database CHECK constraint to allow all checkout flow values (including stripe-hosted), ' +
+            'then immediately bulk-switches products from one flow to another. ' +
+            'Use this if the regular "Bulk Update Checkout Flow" script returns Failed for all products.',
+        danger: false,
+        params: {
+            fromFlow: 'stripe',
+            toFlow: 'stripe-hosted',
+        },
+        paramLabels: {
+            fromFlow: 'Switch FROM flow',
+            toFlow: 'Switch TO flow',
+        },
+        paramOptions: {
+            fromFlow: ['all', ...CHECKOUT_FLOWS],
+            toFlow: CHECKOUT_FLOWS,
+        },
+        paramOptionLabels: {
+            fromFlow: {
+                all: 'All flows',
+                buymeacoffee: '☕ Buy Me a Coffee',
+                stripe: '💳 Stripe Embedded',
+                'stripe-hosted': '💳 Stripe Hosted',
+                kofi: '☕ Ko-fi',
+                external: '🔗 External',
+                'paypal-invoice': '🔵 PayPal Invoice/Request (Telegram Chat)',
+                'paypal-unclaimed': '🔵 PayPal Unclaimed',
+                'paypal-direct': '🔵 PayPal Checkout Direct',
+                'paypal-api': '🔵 PayPal Orders API',
+            },
+            toFlow: {
+                buymeacoffee: '☕ Buy Me a Coffee',
+                stripe: '💳 Stripe Embedded',
+                'stripe-hosted': '💳 Stripe Hosted',
+                kofi: '☕ Ko-fi',
+                external: '🔗 External',
+                'paypal-invoice': '🔵 PayPal Invoice/Request (Telegram Chat)',
+                'paypal-unclaimed': '🔵 PayPal Unclaimed',
+                'paypal-direct': '🔵 PayPal Checkout Direct',
+                'paypal-api': '🔵 PayPal Orders API',
+            },
+        },
+    },
+    {
         id: 'bulk-update-checkout-flow',
         name: 'Bulk Update Checkout Flow',
         description:

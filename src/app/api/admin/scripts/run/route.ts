@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { isRevokedAdminEmail } from '@/lib/admin-access';
+import { createClient } from '@supabase/supabase-js';
 
 // ─── Auth helper (same pattern as other admin routes) ─────────────────────────
 async function getAdminAuth(request: NextRequest) {
@@ -68,6 +69,145 @@ function normalizeBmcSellerUsername(input: string): string {
             .trim()
             .toLowerCase();
     }
+}
+
+/**
+ * Script: fix-checkout-flow-constraint
+ * Drops the old CHECK constraint on checkout_flow and adds a new one that
+ * includes all current supported flow values (including stripe-hosted).
+ * Then optionally runs a bulk update from one flow to another.
+ */
+async function runFixCheckoutFlowConstraint(
+    fromFlow: string,
+    toFlow: string,
+    dryRun: boolean
+): Promise<{ affected: number; results: FlowResult[]; constraintFixed: boolean }> {
+    let constraintFixed = false;
+
+    if (!dryRun) {
+        // We need to use a postgres function or direct SQL.
+        // Supabase JS doesn't support raw DDL, so we use the pg REST SQL endpoint.
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+
+        if (projectRef) {
+            // Try Supabase Management API to run the DDL
+            const migrationSQL = `
+DO $$
+DECLARE
+    constraint_record record;
+BEGIN
+    FOR constraint_record IN
+        SELECT con.conname
+        FROM pg_constraint con
+        JOIN pg_class rel ON rel.oid = con.conrelid
+        JOIN pg_namespace nsp ON nsp.oid = con.connamespace
+        WHERE nsp.nspname = 'public'
+          AND rel.relname = 'products'
+          AND con.contype = 'c'
+          AND pg_get_constraintdef(con.oid) ILIKE '%checkout_flow%'
+    LOOP
+        EXECUTE format('ALTER TABLE public.products DROP CONSTRAINT %I', constraint_record.conname);
+    END LOOP;
+END $$;
+
+ALTER TABLE public.products
+    ADD CONSTRAINT products_checkout_flow_check
+    CHECK (
+        checkout_flow IS NULL OR checkout_flow IN (
+            'buymeacoffee',
+            'kofi',
+            'external',
+            'stripe',
+            'stripe-hosted',
+            'paypal-invoice',
+            'paypal-unclaimed',
+            'paypal-direct',
+            'paypal-api',
+            'lemon-squeezy'
+        )
+    );
+`;
+            try {
+                const mgmtRes = await fetch(
+                    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${serviceKey}`,
+                        },
+                        body: JSON.stringify({ query: migrationSQL }),
+                    }
+                );
+                if (mgmtRes.ok) {
+                    constraintFixed = true;
+                    console.log('[Migration] Constraint updated via Management API');
+                } else {
+                    const errText = await mgmtRes.text();
+                    console.warn('[Migration] Management API failed, will try rpc:', errText.slice(0, 300));
+                }
+            } catch (e) {
+                console.warn('[Migration] Management API threw, will try rpc:', e);
+            }
+        }
+
+        if (!constraintFixed) {
+            // Fallback: try via an exec_sql rpc function if it exists
+            try {
+                const { error: rpcError } = await (supabaseAdmin as any).rpc('exec_sql', {
+                    sql: `ALTER TABLE public.products DROP CONSTRAINT IF EXISTS products_checkout_flow_check; ALTER TABLE public.products ADD CONSTRAINT products_checkout_flow_check CHECK (checkout_flow IS NULL OR checkout_flow IN ('buymeacoffee','kofi','external','stripe','stripe-hosted','paypal-invoice','paypal-unclaimed','paypal-direct','paypal-api','lemon-squeezy'));`
+                });
+                if (!rpcError) {
+                    constraintFixed = true;
+                    console.log('[Migration] Constraint updated via exec_sql rpc');
+                } else {
+                    console.warn('[Migration] exec_sql rpc failed:', rpcError.message);
+                }
+            } catch (e) {
+                console.warn('[Migration] exec_sql rpc threw:', e);
+            }
+        }
+    }
+
+    // Now run the actual flow update
+    let query = supabaseAdmin.from('products').select('slug, title, checkout_flow');
+    if (fromFlow !== 'all') {
+        query = query.eq('checkout_flow', fromFlow);
+    }
+    const { data, error } = await query;
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
+
+    const products = data || [];
+    const affected: FlowResult[] = products.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        oldFlow: p.checkout_flow || 'unknown',
+        newFlow: toFlow,
+        updated: false,
+    }));
+
+    if (!dryRun && affected.length > 0) {
+        for (const item of affected) {
+            const { error: updateError } = await supabaseAdmin
+                .from('products')
+                .update({
+                    checkout_flow: toFlow,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('slug', item.slug);
+
+            if (updateError) {
+                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                item.updated = false;
+            } else {
+                item.updated = true;
+            }
+        }
+    }
+
+    return { affected: affected.length, results: affected, constraintFixed };
 }
 
 /**
@@ -616,6 +756,31 @@ export async function POST(request: NextRequest) {
                     message: dryRun
                         ? `Preview: ${result.affected} unassigned product(s) would be assigned to seller "${sellerRow.name}" (${resolvedSellerId})`
                         : `Done: ${result.results.filter(r => r.updated).length} unassigned product(s) assigned to seller "${sellerRow.name}"`,
+                });
+            }
+
+            case 'fix-checkout-flow-constraint': {
+                const fromFlow = params.fromFlow || 'stripe';
+                const toFlow = params.toFlow || 'stripe-hosted';
+
+                const validFlows = ['buymeacoffee', 'stripe', 'stripe-hosted', 'kofi', 'external', 'paypal-invoice', 'paypal-unclaimed', 'paypal-direct', 'paypal-api'];
+                if (!toFlow || !validFlows.includes(toFlow)) {
+                    return NextResponse.json(
+                        { error: `toFlow must be one of: ${validFlows.join(', ')}` },
+                        { status: 400 }
+                    );
+                }
+
+                const result = await runFixCheckoutFlowConstraint(fromFlow, toFlow, dryRun);
+
+                return NextResponse.json({
+                    scriptId,
+                    dryRun,
+                    affected: result.affected,
+                    results: result.results,
+                    message: dryRun
+                        ? `Preview: ${result.affected} product(s) with flow "${fromFlow}" would be switched to "${toFlow}". Run to also fix DB constraint.`
+                        : `Done: DB constraint fixed=${result.constraintFixed}. ${result.results.filter(r => r.updated).length}/${result.affected} products updated to "${toFlow}".`,
                 });
             }
 
