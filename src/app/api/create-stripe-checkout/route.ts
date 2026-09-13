@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { updateOrderStripeStatus, getOrderById } from '@/lib/supabase/orders';
 import { getProductBySlug } from '@/lib/supabase/products';
 import { getStripeConfig } from '@/lib/supabase/payment-settings';
+import { resolveBaseUrl } from '@/lib/url';
 
 // Stripe initialization deferred to POST request handling to avoid build-time crashes
 
@@ -121,7 +122,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Get the base URL for the embedded Checkout return page.
-        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const origin = process.env.NODE_ENV === 'development'
+            ? request.nextUrl.origin
+            : resolveBaseUrl();
         const shippingAddress = {
             line1: shippingData.streetAddress,
             line2: shippingData.addressLine2 || undefined,

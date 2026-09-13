@@ -15,6 +15,7 @@ import { queueGoogleAdsPurchase } from '@/lib/googleAds';
 const PENDING_ORDER_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
 
 const PURCHASE_TRACKED_KEY_PREFIX = 'purchase_tracked:';
+const PAYMENT_VERIFY_DELAYS_MS = [0, 750, 1500, 3000, 5000];
 
 interface PurchaseTrackingData {
   value: number;
@@ -29,20 +30,29 @@ function trackPurchaseOnce(data: PurchaseTrackingData): boolean {
   if (!data.transactionId || !Number.isFinite(data.value) || data.value <= 0) return false;
 
   const trackingKey = `${PURCHASE_TRACKED_KEY_PREFIX}${data.transactionId}`;
-  if (sessionStorage.getItem(trackingKey)) return true;
+  try {
+    if (sessionStorage.getItem(trackingKey)) return true;
+  } catch {
+    // Tracking must still work when storage is blocked by browser privacy settings.
+  }
 
-  trackPixelEvent(
-    'Purchase',
-    {
-      value: data.value,
-      currency: data.currency,
-      content_ids: data.contentId ? [data.contentId] : [],
-      content_name: data.contentName || '',
-      content_type: 'product',
-      num_items: 1,
-    },
-    { eventID: data.transactionId }
-  );
+  try {
+    trackPixelEvent(
+      'Purchase',
+      {
+        value: data.value,
+        currency: data.currency,
+        content_ids: data.contentId ? [data.contentId] : [],
+        content_name: data.contentName || '',
+        content_type: 'product',
+        num_items: 1,
+      },
+      { eventID: data.transactionId }
+    );
+  } catch (error) {
+    // A failure in one ad platform must not suppress the Google Ads conversion.
+    console.warn('Meta purchase tracking failed:', error);
+  }
 
   const googleQueued = queueGoogleAdsPurchase({
     value: data.value,
@@ -54,7 +64,11 @@ function trackPurchaseOnce(data: PurchaseTrackingData): boolean {
   });
 
   if (googleQueued) {
-    sessionStorage.setItem(trackingKey, '1');
+    try {
+      sessionStorage.setItem(trackingKey, '1');
+    } catch {
+      // Google also deduplicates repeated conversions by transaction_id.
+    }
   }
 
   return googleQueued;
@@ -70,40 +84,55 @@ function ThankYouContent() {
   useEffect(() => {
     // Stripe flow: fire Purchase only from the server-verified session
     if (sessionId) {
+      let cancelled = false;
+
       const verifyInBackground = async () => {
-        try {
-          const response = await fetch('/api/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
-          });
+        let lastResult: any = { status: 'pending' };
 
-          if (response.ok) {
-            const data = await response.json();
-            setOrderDetails(data);
+        for (const delay of PAYMENT_VERIFY_DELAYS_MS) {
+          if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+          if (cancelled) return;
 
-            if (data.status === 'paid') {
-              trackPurchaseOnce({
-                value: data.amount ? data.amount / 100 : 0,
-                currency: data.currency ? data.currency.toUpperCase() : 'USD',
-                transactionId: data.orderId || sessionId,
-                email: data.email || data.customerEmail,
-                contentId: data.productSlug || data.orderId,
-                contentName: data.productTitle,
-              });
+          try {
+            const response = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId }),
+              cache: 'no-store',
+            });
+
+            if (response.ok) {
+              lastResult = await response.json();
+              if (lastResult.status === 'paid') {
+                if (cancelled) return;
+                setOrderDetails(lastResult);
+                trackPurchaseOnce({
+                  value: lastResult.amount ? lastResult.amount / 100 : 0,
+                  currency: lastResult.currency ? lastResult.currency.toUpperCase() : 'USD',
+                  transactionId: lastResult.orderId || sessionId,
+                  email: lastResult.email || lastResult.customerEmail,
+                  contentId: lastResult.productSlug || lastResult.orderId,
+                  contentName: lastResult.productTitle,
+                });
+                clearCart();
+                clearPendingOrder();
+                return;
+              }
+            } else if (response.status >= 400 && response.status < 500) {
+              break;
             }
-          } else {
-            console.warn('⚠️ Payment verification failed, falling back to pending UI');
-            setOrderDetails({ status: 'pending' });
+          } catch (error) {
+            console.warn('Payment verification attempt failed:', error);
           }
-        } catch (error) {
-          console.error('❌ Background verification error:', error);
-          setOrderDetails({ status: 'pending' });
         }
+
+        if (!cancelled) setOrderDetails(lastResult);
       };
 
       verifyInBackground();
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     // Non-Stripe flows (Buy Me A Coffee / external)

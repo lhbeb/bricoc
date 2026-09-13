@@ -56,6 +56,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Bind the Stripe session to the exact order created by this checkout.
+        // This prevents unrelated paid sessions from being used as proof of payment.
+        if (
+            order.checkout_flow !== 'stripe' ||
+            !order.stripe_checkout_session_id ||
+            order.stripe_checkout_session_id !== session.id
+        ) {
+            console.error('[Payment Verification] Session/order binding mismatch:', {
+                orderId,
+                sessionId: session.id,
+                checkoutFlow: order.checkout_flow,
+            });
+            return NextResponse.json(
+                { error: 'Payment session does not match this order' },
+                { status: 400 }
+            );
+        }
+
         const paymentIntentId = typeof session.payment_intent === 'string'
             ? session.payment_intent
             : session.payment_intent?.id;
@@ -100,7 +118,9 @@ export async function POST(request: NextRequest) {
             sessionId: session.id,
             amount: session.amount_total,
             currency: session.currency,
-            customerEmail: session.customer_email || session.metadata?.customer_email || null,
+            customerEmail: session.customer_details?.email || session.customer_email || session.metadata?.customer_email || null,
+        }, {
+            headers: { 'Cache-Control': 'no-store, max-age=0' },
         });
 
     } catch (error: any) {
