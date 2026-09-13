@@ -156,35 +156,21 @@ async function runBulkUpdateCheckoutFlow(
     }));
 
     if (!dryRun && affected.length > 0) {
-        // Build the update — only checkout_flow, never checkout_link
-        const updatePayload: any = {
-            checkout_flow: toFlow,
-            updated_at: new Date().toISOString(),
-        };
-
-        if (fromFlow === 'all') {
-            // Update every product
+        // Perform row-by-row updates to avoid Supabase bulk update restrictions/errors
+        for (const item of affected) {
             const { error: updateError } = await supabaseAdmin
                 .from('products')
-                .update(updatePayload)
-                .neq('slug', ''); // matches all rows
+                .update({
+                    checkout_flow: toFlow,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('slug', item.slug);
 
             if (updateError) {
-                console.error('❌ Bulk flow update failed:', updateError.message);
+                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                item.updated = false;
             } else {
-                affected.forEach(item => (item.updated = true));
-            }
-        } else {
-            // Update only products with the matching flow
-            const { error: updateError } = await supabaseAdmin
-                .from('products')
-                .update(updatePayload)
-                .eq('checkout_flow', fromFlow);
-
-            if (updateError) {
-                console.error('❌ Bulk flow update failed:', updateError.message);
-            } else {
-                affected.forEach(item => (item.updated = true));
+                item.updated = true;
             }
         }
     }
@@ -230,23 +216,21 @@ async function runBulkMarkSoldOut(
     }));
 
     if (!dryRun && affected.length > 0) {
-        let updateQuery = supabaseAdmin
-            .from('products')
-            .update({ in_stock: newStockValue, updated_at: new Date().toISOString() });
+        for (const item of affected) {
+            const { error: updateError } = await supabaseAdmin
+                .from('products')
+                .update({ 
+                    in_stock: newStockValue, 
+                    updated_at: new Date().toISOString() 
+                })
+                .eq('slug', item.slug);
 
-        if (targetFilter === 'matching_only') {
-            updateQuery = markingSoldOut
-                ? updateQuery.neq('in_stock', false)
-                : updateQuery.eq('in_stock', false);
-        } else {
-            updateQuery = updateQuery.neq('slug', ''); // all rows
-        }
-
-        const { error: updateError } = await updateQuery;
-        if (updateError) {
-            console.error('❌ Bulk stock update failed:', updateError.message);
-        } else {
-            affected.forEach(item => (item.updated = true));
+            if (updateError) {
+                console.error(`❌ Failed to update stock for product ${item.slug}:`, updateError.message);
+                item.updated = false;
+            } else {
+                item.updated = true;
+            }
         }
     }
 
@@ -293,16 +277,18 @@ async function runSoldOutBmcSellerProducts(
     }));
 
     if (!dryRun && affected.length > 0) {
-        const { error: updateError } = await supabaseAdmin
-            .from('products')
-            .update({ in_stock: false, updated_at: new Date().toISOString() })
-            .eq('checkout_flow', 'buymeacoffee')
-            .ilike('checkout_link', checkoutLinkPattern);
+        for (const item of affected) {
+            const { error: updateError } = await supabaseAdmin
+                .from('products')
+                .update({ in_stock: false, updated_at: new Date().toISOString() })
+                .eq('slug', item.slug);
 
-        if (updateError) {
-            console.error('❌ BMC seller sold-out update failed:', updateError.message);
-        } else {
-            affected.forEach(item => (item.updated = true));
+            if (updateError) {
+                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                item.updated = false;
+            } else {
+                item.updated = true;
+            }
         }
     }
 
@@ -343,15 +329,18 @@ async function runBulkAssignSellerByAdmin(
     }));
 
     if (!dryRun && affected.length > 0) {
-        const { error: updateError } = await supabaseAdmin
-            .from('products')
-            .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
-            .eq('listed_by', listedBy);
+        for (const item of affected) {
+            const { error: updateError } = await supabaseAdmin
+                .from('products')
+                .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
+                .eq('slug', item.slug);
 
-        if (updateError) {
-            console.error('❌ Bulk seller assign failed:', updateError.message);
-        } else {
-            affected.forEach(item => (item.updated = true));
+            if (updateError) {
+                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                item.updated = false;
+            } else {
+                item.updated = true;
+            }
         }
     }
 
@@ -383,15 +372,18 @@ async function runBulkAssignUnassignedSeller(
     }));
 
     if (!dryRun && affected.length > 0) {
-        const { error: updateError } = await supabaseAdmin
-            .from('products')
-            .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
-            .is('seller_id', null);
+        for (const item of affected) {
+            const { error: updateError } = await supabaseAdmin
+                .from('products')
+                .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
+                .eq('slug', item.slug);
 
-        if (updateError) {
-            console.error('❌ Bulk unassigned seller assign failed:', updateError.message);
-        } else {
-            affected.forEach(item => (item.updated = true));
+            if (updateError) {
+                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                item.updated = false;
+            } else {
+                item.updated = true;
+            }
         }
     }
 
