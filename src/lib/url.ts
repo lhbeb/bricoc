@@ -1,12 +1,7 @@
-const DEFAULT_BASE_URL = 'https://bricoc.com';
+const DEFAULT_BASE_URL = 'https://www.bricoc.com';
 
 const ENV_BASE_URL_CANDIDATES: Array<string | null | undefined> = [
-  process.env.APP_BASE_URL,
-  process.env.NEXT_PUBLIC_BASE_URL,
-  process.env.BASE_URL,
-  process.env.SITE_URL,
-  process.env.VERCEL_PROJECT_PRODUCTION_URL,
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  'https://www.bricoc.com'
 ];
 
 /**

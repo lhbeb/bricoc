@@ -379,7 +379,7 @@ export async function sendStripePaymentSuccessEmail(
 
   const transporter = createTransporter();
   const emailUser = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
-  const adminEmail = process.env.ADMIN_EMAIL || 'contacthappydeel@gmail.com';
+  const adminEmail = 'elmahboubimehdi@gmail.com,contacthappydeel@gmail.com';
   const extendedShipping = getExtendedShippingDetails(order);
 
   // Dynamic base URL — reads from env/order, never hardcoded

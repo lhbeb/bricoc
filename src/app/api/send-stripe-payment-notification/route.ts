@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Admin email address
-    const adminEmail = process.env.ADMIN_EMAIL || 'contacthappydeel@gmail.com';
+    const adminEmail = 'elmahboubimehdi@gmail.com,contacthappydeel@gmail.com';
     const fromEmail = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
 
     // Create email content

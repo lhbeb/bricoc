@@ -20,8 +20,7 @@ export async function POST(request: NextRequest) {
     const siteUrl = resolveBaseUrl([
       request.headers.get('origin'),
       request.headers.get('referer'),
-      process.env.APP_BASE_URL,
-      process.env.NEXT_PUBLIC_BASE_URL,
+      'https://www.bricoc.com',
       'http://localhost:3000',
     ]);
 
@@ -132,8 +131,7 @@ export async function GET(request: NextRequest) {
     const siteUrl = resolveBaseUrl([
       request.headers.get('origin'),
       request.headers.get('referer'),
-      process.env.APP_BASE_URL,
-      process.env.NEXT_PUBLIC_BASE_URL,
+      'https://www.bricoc.com',
       'http://localhost:3000',
     ]);
 

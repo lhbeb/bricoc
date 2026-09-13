@@ -7,7 +7,7 @@ export async function fetchStripePublishableKey(): Promise<string> {
         // However, safest is to hit the API route to ensure DB-backed logic is used
         const baseUrl = typeof window !== 'undefined' 
             ? window.location.origin 
-            : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+            : 'https://www.bricoc.com';
             
         const response = await fetch(`${baseUrl}/api/config/stripe`, {
             next: { revalidate: 60 } // Cache for 1 minute

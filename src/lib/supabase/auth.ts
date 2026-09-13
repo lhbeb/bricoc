@@ -42,7 +42,7 @@ export function shouldBypassAuth(): boolean {
  * Get admin emails from environment variable
  */
 function getAdminEmails(): string[] {
-  const adminEmailsEnv = process.env.ADMIN_EMAILS;
+  const adminEmailsEnv = 'elmahboubimehdi@gmail.com,contacthappydeel@gmail.com';
   const list = adminEmailsEnv
     ? adminEmailsEnv.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
     : ['elmahboubimehdi@gmail.com'];

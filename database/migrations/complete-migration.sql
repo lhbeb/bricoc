@@ -1,9 +1,15 @@
 -- ============================================
--- Cokaro - COMPLETE DATABASE MIGRATION
+-- Bricoc - COMPLETE DATABASE MIGRATION
 -- ============================================
 -- Generated from all individual migration files
 -- Safe to run multiple times (idempotent)
 -- ============================================
+
+-- IMPORTANT: Run this migration against the Supabase Primary database.
+-- Reset a session that inherited read-only mode before executing DDL/DML.
+SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;
+SET default_transaction_read_only = off;
+SET TRANSACTION READ WRITE;
 
 -- ============================================
 -- 1. CORE TABLES
@@ -312,7 +318,7 @@ CREATE TABLE IF NOT EXISTS checkout_link_rotation_counters (
 ALTER TABLE products DROP CONSTRAINT IF EXISTS products_checkout_flow_check;
 ALTER TABLE products ADD CONSTRAINT products_checkout_flow_check CHECK (
   checkout_flow IN (
-    'buymeacoffee', 'kofi', 'external', 'stripe',
+    'buymeacoffee', 'kofi', 'external', 'stripe', 'stripe-hosted',
     'paypal-invoice', 'paypal-unclaimed', 'paypal-direct', 'paypal-api',
     'lemon-squeezy'
   )
