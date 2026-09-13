@@ -13,6 +13,9 @@ import { isRevokedAdminEmail } from '@/lib/admin-access';
 
 const FEATURE_LIMIT = FEATURED_PRODUCT_LIMIT;
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function assertFeaturedLimit(canFeature: boolean) {
   if (!canFeature) return;
 
