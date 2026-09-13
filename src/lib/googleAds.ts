@@ -101,6 +101,8 @@ export function queueGoogleAdsPurchase({
   const gtag = getGoogleAdsTag();
   if (!gtag) return false;
 
+  // gtag's synchronous dataLayer queue is intentionally used here. It safely
+  // retains the purchase during a fresh Stripe redirect while gtag.js downloads.
   const normalizedEmail = email?.trim().toLowerCase();
   if (normalizedEmail) {
     gtag('set', 'user_data', { email: normalizedEmail });
@@ -110,11 +112,11 @@ export function queueGoogleAdsPurchase({
   gtag('event', 'conversion', {
     send_to: `${GOOGLE_ADS_ID}/${PURCHASE_CONVERSION_LABEL}`,
     value,
-    currency,
+    currency: currency || 'USD',
     transaction_id: transactionId,
   });
 
-  // 2. Standard Google Merchant Center / Google Tag ecommerce purchase key event
+  // 2. Standard ecommerce purchase event for Google Tag / Merchant Center / GA4
   gtag('event', 'purchase', {
     transaction_id: transactionId,
     value,
@@ -128,6 +130,8 @@ export function queueGoogleAdsPurchase({
       },
     ],
   });
+
+  console.log('✅ [Google Ads] Purchase conversion queued:', { transactionId, value, currency });
 
   return true;
 }

@@ -23,6 +23,7 @@ import {
   User,
   AlertTriangle,
   CreditCard,
+  FlaskConical,
   ChevronDown,
   MoreHorizontal
 } from 'lucide-react';
@@ -51,6 +52,7 @@ const getMainNavItems = (ordersCount: number): NavItem[] => [
 // Items bundled under the "More" dropdown
 const moreNavItems: NavItem[] = [
   { name: 'Payment Settings', path: '/admin/payment-settings', icon: CreditCard, description: 'Manage Stripe keys' },
+  { name: 'Tracking Test', path: '/admin/tracking-test', icon: FlaskConical, description: 'Verify Google Ads events' },
   { name: 'Scripts', path: '/admin/scripts', icon: Terminal, description: 'Run DB scripts' },
   { name: 'Error Log', path: '/admin/errors', icon: AlertTriangle, description: 'View client crashes' },
 ];
