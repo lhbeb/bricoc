@@ -42,6 +42,7 @@ interface FlowResult {
     oldFlow: string;
     newFlow: string;
     updated: boolean;
+    error?: string;
 }
 
 interface BmcSellerStockResult {
