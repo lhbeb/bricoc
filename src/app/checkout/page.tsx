@@ -34,7 +34,6 @@ const CheckoutPage: React.FC = () => {
   const [paypalConfirmationVariant, setPaypalConfirmationVariant] = useState<'invoice' | 'unclaimed'>('invoice');
   const [paypalConfirmationOrderId, setPaypalConfirmationOrderId] = useState<string | null>(null);
   const [showPaypalDirect, setShowPaypalDirect] = useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   const [assignedCheckoutLink, setAssignedCheckoutLink] = useState<string | null>(null);
   const [paypalDirectOrderId, setPaypalDirectOrderId] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState('');
@@ -50,7 +49,10 @@ const CheckoutPage: React.FC = () => {
     try {
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.get('payment') === 'cancelled') {
-        setCheckoutError('Your PayPal payment was not completed. Your item is still here, so you can try again.');
+        const provider = searchParams.get('provider');
+        setCheckoutError(provider === 'stripe-hosted'
+          ? 'Your Stripe payment was not completed. Your item is still here, so you can try again.'
+          : 'Your PayPal payment was not completed. Your item is still here, so you can try again.');
         window.history.replaceState({}, '', window.location.pathname);
       } else if (searchParams.get('payment') === 'failed') {
         setCheckoutError('PayPal could not complete that payment. Please confirm your delivery details and try again.');
@@ -446,22 +448,28 @@ const CheckoutPage: React.FC = () => {
         console.log('🎨 [Checkout] Ko-fi flow: Showing iframe');
         setShowKofiCheckout(true);
       } else if (checkoutFlow === 'stripe') {
-        console.log('💳 [Checkout] Stripe flow: Creating Embedded Checkout Session');
+        console.log('💳 [Checkout] Stripe flow: Creating Hosted Checkout Session');
         try {
+          setIsRedirecting(true);
+          window.scrollTo({ top: 0 });
+
           const response = await fetch('/api/create-stripe-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId, product, shippingData: form.shippingData }),
           });
           const data = await response.json();
-          if (data.clientSecret) {
-            setStripeClientSecret(data.clientSecret);
+          if (response.ok && data.url) {
+            console.log('🔄 [Checkout] Redirecting to Stripe hosted checkout');
+            window.location.assign(data.url);
           } else {
             console.error('❌ [Checkout] Stripe session creation failed:', data);
+            setIsRedirecting(false);
             setCheckoutError(data.error || 'Failed to initialize payment. Please try again.');
           }
         } catch (error) {
-          console.error('❌ [Checkout] Failed connecting to Stripe:', error);
+          console.error('❌ [Checkout] Failed connecting to Stripe Hosted Checkout:', error);
+          setIsRedirecting(false);
           setCheckoutError('Could not connect to payment provider. Please check your connection and try again.');
         }
       } else if (checkoutFlow === 'paypal-invoice' || checkoutFlow === 'paypal-unclaimed') {
@@ -537,7 +545,6 @@ const CheckoutPage: React.FC = () => {
   }
 
   const hasActiveCheckoutFlow = Boolean(
-    stripeClientSecret ||
     showKofiCheckout ||
     showPaypalConfirmation ||
     isRedirecting ||
@@ -550,7 +557,6 @@ const CheckoutPage: React.FC = () => {
         product={cartItem.product}
         shippingData={form.shippingData}
         sellerName={sellerName}
-        stripeClientSecret={stripeClientSecret}
         showKofiCheckout={showKofiCheckout}
         assignedCheckoutLink={assignedCheckoutLink}
         showPaypalConfirmation={showPaypalConfirmation}
@@ -561,10 +567,6 @@ const CheckoutPage: React.FC = () => {
         showPaypalDirect={showPaypalDirect}
         paypalDirectEmail={paypalDirectEmail}
         paypalDirectOrderId={paypalDirectOrderId}
-        onStripeBack={() => {
-          setStripeClientSecret(null);
-          setCheckoutError('');
-        }}
         onKofiClose={() => {
           setShowKofiCheckout(false);
         }}

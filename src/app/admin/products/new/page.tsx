@@ -684,7 +684,7 @@ export default function NewProductPage() {
                       </>
                     ) : formData.checkout_flow === 'stripe' ? (
                       <>
-                        <strong>Stripe:</strong> Customer is redirected to Stripe&apos;s secure checkout page. Requires Stripe API keys in environment variables.
+                        <strong>Stripe:</strong> Customer is redirected to Stripe&apos;s secure hosted checkout page. Uses the active Stripe keys from Payment Settings.
                       </>
                     ) : formData.checkout_flow === 'external' ? (
                       <>
