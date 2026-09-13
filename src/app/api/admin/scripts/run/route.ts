@@ -307,8 +307,14 @@ async function runBulkUpdateCheckoutFlow(
                 .eq('slug', item.slug);
 
             if (updateError) {
-                console.error(`❌ Failed to update product ${item.slug}:`, updateError.message);
+                console.error(`❌ Failed to update product ${item.slug}:`, {
+                    code: updateError.code,
+                    message: updateError.message,
+                    details: updateError.details,
+                    hint: updateError.hint,
+                });
                 item.updated = false;
+                item.error = `${updateError.code}: ${updateError.message}`;
             } else {
                 item.updated = true;
             }
@@ -593,6 +599,8 @@ export async function POST(request: NextRequest) {
                 }
 
                 const result = await runBulkUpdateCheckoutFlow(fromFlow, toFlow, dryRun);
+                const failed = result.results.filter(r => !r.updated && (r as any).error);
+                const firstError = (failed[0] as any)?.error;
 
                 return NextResponse.json({
                     scriptId,
@@ -601,7 +609,7 @@ export async function POST(request: NextRequest) {
                     results: result.results,
                     message: dryRun
                         ? `Preview: ${result.affected} product(s) would have checkout_flow changed to "${toFlow}"`
-                        : `Done: ${result.results.filter(r => r.updated).length} product(s) updated to "${toFlow}"`,
+                        : `Done: ${result.results.filter(r => r.updated).length} product(s) updated to "${toFlow}"${firstError ? `. First error: ${firstError}` : ''}`,
                 });
             }
 
