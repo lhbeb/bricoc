@@ -21,8 +21,10 @@ export async function generateMetadata(
     if (!product) product = await getProductBySlug(slug);
     if (!product) return { title: 'Product Not Found | Bricoc' };
 
-    const title = `${product.title || 'Product'} - ${product.brand || ''} | ${product.category || ''} | Bricoc`;
-    const description = (product.description || '').substring(0, 155) + '...';
+    const fallbackTitle = `${product.title || 'Product'} | Bricoc`;
+    const fallbackDescription = (product.description || '').substring(0, 160).trim();
+    const title = product.meta?.title?.trim() || fallbackTitle;
+    const description = product.meta?.description?.trim() || fallbackDescription;
     const canonicalUrl = `${BASE_URL}/products/${product.slug}`;
     const currencyCode = product.currency || 'USD';
     const price = (product.price || 0).toFixed(2);
@@ -41,8 +43,8 @@ export async function generateMetadata(
         canonical: canonicalUrl,
       },
       openGraph: {
-        title,
-        description,
+        title: product.meta?.ogTitle?.trim() || title,
+        description: product.meta?.ogDescription?.trim() || description,
         url: canonicalUrl,
         siteName: 'Bricoc',
         type: 'website',
@@ -50,8 +52,8 @@ export async function generateMetadata(
       },
       twitter: {
         card: 'summary_large_image',
-        title,
-        description,
+        title: product.meta?.twitterTitle?.trim() || title,
+        description: product.meta?.twitterDescription?.trim() || description,
         images: imageUrls.map(i => i.url),
       },
       // Extra OG product tags consumed by Facebook, Pinterest, Google Shopping
