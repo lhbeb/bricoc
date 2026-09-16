@@ -37,16 +37,26 @@ function loadRoute(file, mocks) {
   let product, order, linked, created, updates, notifications, paymentStatus;
   const reset = () => {
     product = { id: 'product-1', slug: 'mower', title: 'Real mower', price: 100, currency: 'USD', inStock: true, images: [] };
-    order = { id: 'order-1', product_slug: 'mower', product_title: 'Real mower', order_number: 123, status: 'pending_payment' };
+    order = {
+      id: 'order-1',
+      product_slug: 'mower',
+      product_title: 'Real mower',
+      order_number: 123,
+      status: 'pending_payment',
+      checkout_flow: 'stripe',
+      stripe_checkout_session_id: 'cs_test',
+      stripe_email_sent: false,
+    };
     linked = true; created = []; updates = []; notifications = 0; paymentStatus = 'paid';
   };
   const mocks = {
     'next/server': { NextResponse: { json: (data, options = {}) => ({ status: options.status || 200, data }) } },
     stripe: class Stripe { constructor() { this.checkout = { sessions: {
-      create: async params => { created.push(params); return { id: 'cs_test', client_secret: 'test_secret' }; },
+      create: async params => { created.push(params); return { id: 'cs_test', client_secret: 'test_secret', url: 'https://checkout.stripe.com/c/test' }; },
       retrieve: async () => ({ id: 'cs_test', payment_status: paymentStatus, metadata: { order_id: 'order-1' }, payment_intent: 'pi_test', amount_total: 10000, currency: 'usd' }),
     } }; } },
     '@/lib/supabase/payment-settings': { getStripeConfig: async () => ({ secretKey: 'mock' }) },
+    '@/lib/url': { resolveBaseUrl: () => 'https://bricoc.com' },
     '@/lib/supabase/products': { getProductBySlug: async () => product },
     '@/lib/supabase/orders': {
       getOrderById: async () => order,
@@ -55,11 +65,12 @@ function loadRoute(file, mocks) {
     '@/lib/email/sender': { sendStripePaymentSuccessEmail: async () => { notifications++; return { success: true }; } },
   };
   const create = loadRoute('src/app/api/create-stripe-checkout/route.ts', mocks).POST;
+  const createHosted = loadRoute('src/app/api/create-stripe-hosted-checkout/route.ts', mocks).POST;
   const verify = loadRoute('src/app/api/verify-payment/route.ts', mocks).POST;
   const request = () => ({ headers: { get: () => 'https://bricoc.com' }, json: async () => ({
     orderId: 'order-1', product: { slug: 'mower', title: 'Tampered', price: 1, currency: 'GBP' },
     shippingData: { fullName: 'Test Buyer', email: 'test@example.com', streetAddress: '1 Test St', addressLine2: 'Unit 2', city: 'Boston', state: 'MA', zipCode: '02108', countryCode: 'US' },
-  }) });
+  }), nextUrl: { origin: 'https://bricoc.com' } });
   reset();
   assert.equal((await create(request())).status, 200);
   const session = created[0];
@@ -70,8 +81,26 @@ function loadRoute(file, mocks) {
   assert.equal(session.payment_intent_data.shipping.address.line2, 'Unit 2');
   assert.equal(session.payment_intent_data.shipping.address.country, 'US');
   assert.equal(session.payment_intent_data.shipping.name, 'Test Buyer');
+  assert.ok(session.expires_at - Math.floor(Date.now() / 1000) > 30 * 60);
   assert.equal(session.shipping_address_collection, undefined);
   assert.equal(updates[0].stripe_checkout_session_id, 'cs_test');
+  reset();
+  order.checkout_flow = 'stripe-hosted';
+  assert.equal((await createHosted(request())).status, 200);
+  const hostedSession = created[0];
+  assert.equal(hostedSession.ui_mode, undefined);
+  assert.equal(hostedSession.success_url, 'https://bricoc.com/thankyou?session_id={CHECKOUT_SESSION_ID}');
+  assert.equal(hostedSession.cancel_url, 'https://bricoc.com/checkout?payment=cancelled&provider=stripe-hosted');
+  assert.equal(hostedSession.line_items[0].price_data.product_data.name, 'Bricoc Order #123');
+  assert.equal(hostedSession.line_items[0].price_data.product_data.description, undefined);
+  assert.equal(hostedSession.line_items[0].price_data.product_data.images, undefined);
+  assert.equal(JSON.stringify(hostedSession.metadata), JSON.stringify({ order_id: 'order-1', bricoc_order_number: '123' }));
+  assert.equal(hostedSession.payment_intent_data.shipping.address.country, 'US');
+  assert.ok(hostedSession.expires_at - Math.floor(Date.now() / 1000) > 30 * 60);
+  reset();
+  order.checkout_flow = 'stripe';
+  assert.equal((await createHosted(request())).status, 400);
+  assert.equal(created.length, 0);
   for (const fullName of [undefined, '', '   ']) {
     reset();
     const input = request();
@@ -94,5 +123,17 @@ function loadRoute(file, mocks) {
   assert.equal((await verify(verifyRequest)).data.status, 'pending'); assert.equal(updates.length, 0); assert.equal(notifications, 0);
   reset(); assert.equal((await verify(verifyRequest)).data.status, 'paid'); assert.equal(order.status, 'paid'); assert.equal(notifications, 1);
   reset(); linked = false; assert.equal((await verify(verifyRequest)).status, 500); assert.equal(notifications, 0);
-  console.log('PASS: Stripe pricing, delivery address, order validation, session linking, and paid verification recovery. No external calls.');
+
+  const thankyouSource = fs.readFileSync(path.join(__dirname, '../src/app/thankyou/page.tsx'), 'utf8');
+  assert.match(thankyouSource, /searchParams\.get\('session_id'\)/);
+  assert.match(thankyouSource, /fetch\('\/api\/verify-payment'/);
+  assert.match(thankyouSource, /lastResult\.status === 'paid'/);
+  assert.match(thankyouSource, /queueGoogleAdsPurchase\(\{/);
+  assert.match(thankyouSource, /transactionId: lastResult\.orderId \|\| sessionId/);
+
+  const googleAdsSource = fs.readFileSync(path.join(__dirname, '../src/lib/googleAds.ts'), 'utf8');
+  assert.match(googleAdsSource, /PURCHASE_CONVERSION_LABEL/);
+  assert.match(googleAdsSource, /send_to: `\$\{GOOGLE_ADS_ID\}\/\$\{PURCHASE_CONVERSION_LABEL\}`/);
+  assert.match(googleAdsSource, /gtag\('event', 'purchase'/);
+  console.log('PASS: Stripe embedded/hosted checkout creation, delivery address, order validation, session linking, and paid verification recovery. No external calls.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

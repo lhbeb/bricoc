@@ -15,6 +15,8 @@ export default function PaymentSettingsPage() {
     const [secretKey, setSecretKey] = useState('');
     const [mode, setMode] = useState('live');
     const [showSecret, setShowSecret] = useState(false);
+    const [webhookSecret, setWebhookSecret] = useState('');
+    const [showWebhookSecret, setShowWebhookSecret] = useState(false);
     const [isConfigured, setIsConfigured] = useState(false);
     
     // PayPal Direct redirect state
@@ -81,6 +83,7 @@ export default function PaymentSettingsPage() {
                     setIsConfigured(true);
                     setPublishableKey(data.stripe.publishableKey || '');
                     setSecretKey(data.stripe.secretKey || '');
+                    setWebhookSecret(data.stripe.webhookSecret || '');
                     setMode(data.stripe.mode || 'live');
                 }
 
@@ -119,14 +122,17 @@ export default function PaymentSettingsPage() {
             return;
         }
         
-        if (secretKey.includes('*')) {
-            setStatusMessage({ type: 'error', text: 'Please enter the full secret key replacing the masked value' });
+        const isMaskedSecretKey = secretKey.includes('*');
+        const isMaskedWebhookSecret = webhookSecret.includes('*');
+
+        if (!isMaskedSecretKey && !secretKey.startsWith('sk_') && !secretKey.startsWith('rk_')) {
+            setStatusMessage({ type: 'error', text: 'Secret Key must start with sk_ or rk_' });
             setIsSaving(false);
             return;
         }
 
-        if (!secretKey.startsWith('sk_') && !secretKey.startsWith('rk_')) {
-            setStatusMessage({ type: 'error', text: 'Secret Key must start with sk_ or rk_' });
+        if (webhookSecret.trim() && !isMaskedWebhookSecret && !webhookSecret.trim().startsWith('whsec_')) {
+            setStatusMessage({ type: 'error', text: 'Webhook Signing Secret must start with whsec_' });
             setIsSaving(false);
             return;
         }
@@ -143,6 +149,7 @@ export default function PaymentSettingsPage() {
                     provider: 'stripe',
                     publishableKey,
                     secretKey,
+                    webhookSecret,
                     mode
                 })
             });
@@ -366,6 +373,32 @@ export default function PaymentSettingsPage() {
                                 <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
                                     <AlertCircle className="h-3.5 w-3.5" /> 
                                     Keep this secret. This is never exposed to the browser.
+                                </p>
+                            </div>
+
+                            <div className="pt-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Webhook Signing Secret</label>
+                                <div className="relative">
+                                    <input
+                                        type={showWebhookSecret ? "text" : "password"}
+                                        value={webhookSecret}
+                                        onChange={(e) => setWebhookSecret(e.target.value)}
+                                        placeholder="whsec_..."
+                                        className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#233F31] focus:border-transparent text-sm font-mono"
+                                        autoComplete="new-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-md focus:outline-none"
+                                        aria-label={showWebhookSecret ? 'Hide Webhook Signing Secret' : 'Show Webhook Signing Secret'}
+                                    >
+                                        {showWebhookSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
+                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    Used only on the server to verify Stripe webhook signatures.
                                 </p>
                             </div>
 

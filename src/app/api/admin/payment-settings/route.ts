@@ -73,6 +73,44 @@ async function getPaypalSettingsRow() {
     return { data, error };
 }
 
+async function getStripeSettingsRow() {
+    const primaryResult = await supabaseAdmin
+        .from('payment_settings')
+        .select('publishable_key, secret_key, webhook_secret, mode, is_active')
+        .eq('provider', 'stripe')
+        .maybeSingle();
+
+    if (primaryResult.error && primaryResult.error.code === '42703') {
+        const fallbackResult = await supabaseAdmin
+            .from('payment_settings')
+            .select('publishable_key, secret_key, mode, is_active')
+            .eq('provider', 'stripe')
+            .maybeSingle();
+
+        return {
+            data: fallbackResult.data ? { ...fallbackResult.data, webhook_secret: null } : null,
+            error: fallbackResult.error,
+        };
+    }
+
+    return primaryResult;
+}
+
+function maskSecret(value?: string | null) {
+    if (!value) return '';
+
+    const visibleChars = 8;
+    if (value.length <= visibleChars) {
+        return '*'.repeat(Math.max(8, value.length));
+    }
+
+    return value.substring(0, visibleChars) + '*'.repeat(Math.max(0, value.length - visibleChars));
+}
+
+function isMaskedSecret(value: string) {
+    return value.includes('*');
+}
+
 export async function GET(request: NextRequest) {
     try {
         const auth = await getAdminAuth(request);
@@ -81,11 +119,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch Stripe settings
-        const { data: stripeData, error: stripeError } = await supabaseAdmin
-            .from('payment_settings')
-            .select('publishable_key, secret_key, mode, is_active')
-            .eq('provider', 'stripe')
-            .single();
+        const { data: stripeData, error: stripeError } = await getStripeSettingsRow();
 
         // Fetch PayPal settings
         const { data: paypalData, error: paypalError } = await getPaypalSettingsRow();
@@ -116,14 +150,11 @@ export async function GET(request: NextRequest) {
         };
 
         if (stripeData) {
-            const secretLength = stripeData.secret_key.length;
-            const visibleChars = 8;
-            const maskedSecret = stripeData.secret_key.substring(0, visibleChars) + '*'.repeat(Math.max(0, secretLength - visibleChars));
-            
             response.stripe = {
                 isConfigured: true,
                 publishableKey: stripeData.publishable_key,
-                secretKey: maskedSecret,
+                secretKey: maskSecret(stripeData.secret_key),
+                webhookSecret: maskSecret(stripeData.webhook_secret),
                 mode: stripeData.mode,
                 isActive: stripeData.is_active
             };
@@ -169,6 +200,7 @@ export async function POST(request: NextRequest) {
             provider,
             publishableKey,
             secretKey,
+            webhookSecret,
             mode,
             payeeEmail,
             clientId,
@@ -319,40 +351,75 @@ export async function POST(request: NextRequest) {
         }
 
         // Default Stripe logic
-        if (!publishableKey || !secretKey || !mode) {
+        const normalizedPublishableKey = typeof publishableKey === 'string' ? publishableKey.trim() : '';
+        const submittedSecretKey = typeof secretKey === 'string' ? secretKey.trim() : '';
+        const submittedWebhookSecret = typeof webhookSecret === 'string' ? webhookSecret.trim() : undefined;
+        const normalizedMode = mode === 'test' ? 'test' : mode === 'live' ? 'live' : '';
+
+        const { data: existingStripe, error: existingStripeError } = await supabaseAdmin
+            .from('payment_settings')
+            .select('id, secret_key, webhook_secret')
+            .eq('provider', 'stripe')
+            .maybeSingle();
+
+        if (existingStripeError && existingStripeError.code === '42703') {
+            return NextResponse.json(
+                { error: 'Webhook secret database migration is required before saving Stripe settings.' },
+                { status: 500 }
+            );
+        }
+
+        if (existingStripeError) {
+            console.error('Error checking existing Stripe settings:', existingStripeError);
+            return NextResponse.json({ error: 'Failed to read current Stripe configuration.' }, { status: 500 });
+        }
+
+        const resolvedSecretKey = isMaskedSecret(submittedSecretKey)
+            ? existingStripe?.secret_key || ''
+            : submittedSecretKey;
+
+        const resolvedWebhookSecret = submittedWebhookSecret === undefined
+            ? existingStripe?.webhook_secret || ''
+            : isMaskedSecret(submittedWebhookSecret)
+                ? existingStripe?.webhook_secret || ''
+                : submittedWebhookSecret;
+
+        if (!normalizedPublishableKey || !resolvedSecretKey || !normalizedMode) {
             return NextResponse.json({ error: 'Missing required configuration fields' }, { status: 400 });
         }
 
-        if (!publishableKey.startsWith('pk_')) {
+        if (!normalizedPublishableKey.startsWith('pk_')) {
             return NextResponse.json({ error: 'Invalid Publishable Key signature' }, { status: 400 });
         }
 
-        if (!secretKey.startsWith('sk_') && !secretKey.startsWith('rk_')) {
-            if (secretKey.includes('***')) {
-                return NextResponse.json({ error: 'Please provide the full secret key, not the masked view' }, { status: 400 });
+        if (!resolvedSecretKey.startsWith('sk_') && !resolvedSecretKey.startsWith('rk_')) {
+            if (isMaskedSecret(submittedSecretKey)) {
+                return NextResponse.json({ error: 'Please provide the full secret key before saving.' }, { status: 400 });
             }
             return NextResponse.json({ error: 'Invalid Secret Key signature' }, { status: 400 });
         }
 
-        // Check if a Stripe row already exists so we can UPDATE instead of INSERT.
+        if (resolvedWebhookSecret && !resolvedWebhookSecret.startsWith('whsec_')) {
+            if (submittedWebhookSecret && isMaskedSecret(submittedWebhookSecret)) {
+                return NextResponse.json({ error: 'Please provide the full webhook signing secret before saving.' }, { status: 400 });
+            }
+            return NextResponse.json({ error: 'Invalid Webhook Signing Secret signature' }, { status: 400 });
+        }
+
+        // Update the existing Stripe row instead of using upsert.
         // We avoid .upsert({ onConflict: 'provider' }) because the DB uses a
         // *partial* unique index (WHERE is_active = true), which PostgreSQL does
         // not accept for ON CONFLICT resolution.
-        const { data: existingStripe } = await supabaseAdmin
-            .from('payment_settings')
-            .select('id')
-            .eq('provider', 'stripe')
-            .maybeSingle();
-
         let stripeError: any = null;
 
         if (existingStripe) {
             const { error: updateError } = await supabaseAdmin
                 .from('payment_settings')
                 .update({
-                    publishable_key: publishableKey,
-                    secret_key: secretKey,
-                    mode: mode,
+                    publishable_key: normalizedPublishableKey,
+                    secret_key: resolvedSecretKey,
+                    webhook_secret: resolvedWebhookSecret || null,
+                    mode: normalizedMode,
                     is_active: true,
                     updated_by: auth.email
                 })
@@ -363,9 +430,10 @@ export async function POST(request: NextRequest) {
                 .from('payment_settings')
                 .insert({
                     provider: 'stripe',
-                    publishable_key: publishableKey,
-                    secret_key: secretKey,
-                    mode: mode,
+                    publishable_key: normalizedPublishableKey,
+                    secret_key: resolvedSecretKey,
+                    webhook_secret: resolvedWebhookSecret || null,
+                    mode: normalizedMode,
                     is_active: true,
                     updated_by: auth.email
                 });

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS public.payment_settings (
     provider VARCHAR(50) NOT NULL DEFAULT 'stripe',
     publishable_key TEXT NOT NULL,
     secret_key TEXT NOT NULL,
+    webhook_secret TEXT,
     is_active BOOLEAN NOT NULL DEFAULT true,
     mode VARCHAR(20) NOT NULL DEFAULT 'live',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

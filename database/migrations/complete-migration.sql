@@ -288,6 +288,7 @@ CREATE TABLE IF NOT EXISTS public.payment_settings (
   provider VARCHAR(50) NOT NULL DEFAULT 'stripe',
   publishable_key TEXT NOT NULL,
   secret_key TEXT NOT NULL,
+  webhook_secret TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
   mode VARCHAR(20) NOT NULL DEFAULT 'live',
   payee_email TEXT,
@@ -300,6 +301,7 @@ CREATE TABLE IF NOT EXISTS public.payment_settings (
 DROP INDEX IF EXISTS unique_active_stripe;
 ALTER TABLE public.payment_settings DROP CONSTRAINT IF EXISTS payment_settings_provider_unique;
 ALTER TABLE public.payment_settings ADD CONSTRAINT payment_settings_provider_unique UNIQUE (provider);
+ALTER TABLE public.payment_settings ADD COLUMN IF NOT EXISTS webhook_secret TEXT;
 
 -- ============================================
 -- 7. CHECKOUT LINK ROTATION TABLE

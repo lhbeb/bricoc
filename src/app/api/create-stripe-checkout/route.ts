@@ -165,8 +165,8 @@ export async function POST(request: NextRequest) {
                     address: shippingAddress,
                 },
             },
-            // Stripe requires expires_at to be at least 30 minutes from now
-            expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes from now
+            // Stripe requires at least 30 minutes; keep a small buffer for clock skew/network latency.
+            expires_at: Math.floor(Date.now() / 1000) + (31 * 60),
             metadata: {
                 order_id: orderId,
                 product_slug: dbProduct.slug,
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
         const linked = await updateOrderStripeStatus(orderId, {
             stripe_checkout_session_id: session.id,
             status: 'pending_payment',
-            checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+            checkout_expires_at: new Date(Date.now() + 31 * 60 * 1000).toISOString()
         });
 
         if (!linked) {

@@ -141,10 +141,11 @@ export async function POST(request: NextRequest) {
             postal_code: shippingData.zipCode,
         };
         const orderReference = order.order_number ? `#${order.order_number}` : orderId;
+        const stripeOrderName = `Bricoc Order ${orderReference}`;
 
-        // Create a Stripe-hosted Checkout Session. The delivery address was already
-        // collected and saved on Bricoc, so the hosted page only needs payment data.
-        // NOTE: price/currency/title come from the DATABASE, not the client.
+        // Create a Stripe-hosted Checkout Session. Keep Stripe's customer-facing
+        // line item generic; product details stay in Bricoc/Supabase.
+        // NOTE: price/currency come from the DATABASE, not the client.
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -152,9 +153,7 @@ export async function POST(request: NextRequest) {
                     price_data: {
                         currency: dbProduct.currency?.toLowerCase() || 'usd',
                         product_data: {
-                            name: dbProduct.title,
-                            description: `Bricoc order ${orderReference}`,
-                            images: dbProduct.images && dbProduct.images.length > 0 ? [dbProduct.images[0]] : undefined,
+                            name: stripeOrderName,
                         },
                         unit_amount: Math.round(dbProduct.price * 100), // Stripe expects amount in cents
                     },
@@ -172,17 +171,11 @@ export async function POST(request: NextRequest) {
                     address: shippingAddress,
                 },
             },
-            // Stripe requires expires_at to be at least 30 minutes from now
-            expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes from now
+            // Stripe requires at least 30 minutes; keep a small buffer for clock skew/network latency.
+            expires_at: Math.floor(Date.now() / 1000) + (31 * 60),
             metadata: {
                 order_id: orderId,
-                product_slug: dbProduct.slug,
-                product_id: dbProduct.id,
-                customer_email: shippingData.email,
-                shipping_address: shippingData.streetAddress,
-                shipping_city: shippingData.city,
-                shipping_state: shippingData.state,
-                shipping_zip: shippingData.zipCode,
+                bricoc_order_number: order.order_number ? String(order.order_number) : '',
             },
         });
 
@@ -190,7 +183,7 @@ export async function POST(request: NextRequest) {
         const linked = await updateOrderStripeStatus(orderId, {
             stripe_checkout_session_id: session.id,
             status: 'pending_payment',
-            checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+            checkout_expires_at: new Date(Date.now() + 31 * 60 * 1000).toISOString()
         });
 
         if (!linked) {

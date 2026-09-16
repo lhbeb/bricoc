@@ -315,7 +315,16 @@ async function runBulkUpdateCheckoutFlow(
                     hint: updateError.hint,
                 });
                 item.updated = false;
-                item.error = `${updateError.code}: ${updateError.message}`;
+                const isCheckoutFlowConstraintError =
+                    updateError.code === '23514'
+                    && (
+                        updateError.message?.includes('products_checkout_flow_check')
+                        || updateError.details?.includes('products_checkout_flow_check')
+                    );
+
+                item.error = isCheckoutFlowConstraintError
+                    ? 'Database constraint blocks this checkout flow. Run "Fix Checkout Flow Constraint + Bulk Switch" first, or update the deployed Supabase environment.'
+                    : `${updateError.code}: ${updateError.message}`;
             } else {
                 item.updated = true;
             }
@@ -602,6 +611,20 @@ export async function POST(request: NextRequest) {
                 const result = await runBulkUpdateCheckoutFlow(fromFlow, toFlow, dryRun);
                 const failed = result.results.filter(r => !r.updated && (r as any).error);
                 const firstError = (failed[0] as any)?.error;
+                const updatedCount = result.results.filter(r => r.updated).length;
+
+                if (!dryRun && failed.length > 0) {
+                    return NextResponse.json(
+                        {
+                            scriptId,
+                            dryRun,
+                            affected: result.affected,
+                            results: result.results,
+                            error: `Failed to update ${failed.length}/${result.affected} product(s). ${firstError || 'Check server logs for details.'}`,
+                        },
+                        { status: 409 }
+                    );
+                }
 
                 return NextResponse.json({
                     scriptId,
@@ -610,7 +633,7 @@ export async function POST(request: NextRequest) {
                     results: result.results,
                     message: dryRun
                         ? `Preview: ${result.affected} product(s) would have checkout_flow changed to "${toFlow}"`
-                        : `Done: ${result.results.filter(r => r.updated).length} product(s) updated to "${toFlow}"${firstError ? `. First error: ${firstError}` : ''}`,
+                        : `Done: ${updatedCount} product(s) updated to "${toFlow}"`,
                 });
             }
 

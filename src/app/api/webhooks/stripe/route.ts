@@ -6,8 +6,6 @@ import { getStripeConfig } from '@/lib/supabase/payment-settings';
 
 // Stripe initialization deferred to handler to avoid build-time crashes
 
-// Webhook secret from Stripe Dashboard
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(request: NextRequest) {
     try {
@@ -17,13 +15,21 @@ export async function POST(request: NextRequest) {
             apiVersion: '2026-01-28.clover' as any,
         });
 
+        const webhookSecret = (stripeConfig.webhookSecret || process.env.STRIPE_WEBHOOK_SECRET || '').trim();
+
         const body = await request.text();
+        const requestSignature = request.headers.get('stripe-signature');
         const headersList = await headers();
-        const signature = headersList.get('stripe-signature');
+        const signature = requestSignature || headersList.get('stripe-signature');
 
         if (!signature) {
             console.error('[Stripe Webhook] No signature found');
             return NextResponse.json({ error: 'No signature' }, { status: 400 });
+        }
+
+        if (!webhookSecret) {
+            console.error('[Stripe Webhook] Webhook signing secret is not configured');
+            return NextResponse.json({ error: 'Webhook signing secret is not configured' }, { status: 500 });
         }
 
         // Verify webhook signature
@@ -31,9 +37,12 @@ export async function POST(request: NextRequest) {
         try {
             event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
         } catch (err) {
-            console.error('[Stripe Webhook] Signature verification failed:', err);
+            console.error(
+                '[Stripe Webhook] Signature verification failed:',
+                err instanceof Error ? err.message : 'Unknown error'
+            );
             return NextResponse.json(
-                { error: `Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
+                { error: 'Webhook signature verification failed' },
                 { status: 400 }
             );
         }
