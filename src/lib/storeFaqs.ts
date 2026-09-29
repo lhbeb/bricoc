@@ -9,29 +9,29 @@ export const STORE_FAQS: readonly StoreFaq[] = [
   {
     question: 'What products does Bricoc sell?',
     answer:
-      'Bricoc designs, manufactures, and sells premium electric golf carts, 4-passenger and 6-passenger street-legal carts, all-terrain utility carts, and official golf cart accessories.',
+      'Bricoc currently lists golf bags, including stand and cart bags, leather golf gloves, and golf ball carriers and dispensers. The catalog shows current products and availability.',
   },
   {
-    question: 'Are your golf carts new or refurbished?',
+    question: 'Where can I find product details and availability?',
     answer:
-      'All Bricoc golf carts are brand-new, built with top-tier lithium battery powertrains, custom aluminum/steel chassis, and backed by a comprehensive manufacturer warranty.',
+      'Open a product listing to review its description, images, price, and availability before ordering. Contact Bricoc if you need help with a specific listing.',
   },
   {
     question: 'How do I place an order?',
     answer:
-      'Choose your preferred Bricoc model, add it to your cart, and proceed to checkout. Review delivery address and secure payment options to complete your order.',
+      'Choose a product from the current catalog, review its listing details, add it to your cart, and follow the checkout steps to place your order.',
   },
   {
-    question: 'Where do you ship and how long does delivery take?',
+    question: 'Where can I find shipping destinations and delivery estimates?',
     answer:
-      'We offer free nationwide delivery across North America and the UK using specialized enclosed vehicle carriers. Tracking and direct driver updates are provided upon dispatch.',
+      'The Shipping Policy explains current destinations, shipping options, processing, and estimated delivery timing. Check the policy and checkout details for your order.',
     linkHref: '/shipping-policy',
     linkLabel: 'Read our Shipping & Delivery Policy',
   },
   {
-    question: 'How can I track my golf cart delivery?',
+    question: 'How can I track my order?',
     answer:
-      'When your golf cart is dispatched, we send full tracking details and carrier dispatch information to your email address. You can also use our Track Order page.',
+      'Use the tracking information in your shipping confirmation email or visit the Track Order page. Contact support if you need help locating your order details.',
     linkHref: '/track',
     linkLabel: 'Track your order',
   },
@@ -43,28 +43,16 @@ export const STORE_FAQS: readonly StoreFaq[] = [
     linkLabel: 'Read our Return & Exchange Policy',
   },
   {
-    question: 'Can I exchange or upgrade a model?',
+    question: 'Can I return or exchange a product?',
     answer:
-      'Yes, exchanges and custom upgrades are supported depending on inventory availability. Contact our support team within 30 days of delivery.',
-  },
-  {
-    question: 'Is local pickup or showroom test drive available?',
-    answer:
-      'Local pickup and test drives are available at our regional showrooms. Please schedule an appointment before visiting so your vehicle is prepped.',
-    linkHref: '/local-pickup',
-    linkLabel: 'View Local Pickup Guide',
-  },
-  {
-    question: 'Can I customize my golf cart (color, seats, lift kit)?',
-    answer:
-      'Yes! Bricoc offers custom seat upholstery, lift kits, all-terrain wheels, soundbars, and custom finishes. Contact our team to configure your build.',
-    linkHref: '/contact',
-    linkLabel: 'Inquire about custom builds',
+      'Return and exchange eligibility, timelines, and instructions are listed in the Return & Exchange Policy. Review it and contact support with questions about your order.',
+    linkHref: '/return-policy',
+    linkLabel: 'Read the Return & Exchange Policy',
   },
   {
     question: 'How can I contact Bricoc support?',
     answer:
-      'You can use our contact form, email contact@bricoc.com, or call +19129231747 during published support hours.',
+      'You can use our contact form, email contact@bricoc.com, or call +1(978) 664-9000 during published support hours.',
     linkHref: '/contact',
     linkLabel: 'Contact our team',
   },

@@ -22,9 +22,9 @@ export default function ContactPage() {
         '@type': 'ContactPage',
         '@id': 'https://bricoc.com/contact#webpage',
         'url': 'https://bricoc.com/contact',
-        'name': 'Contact Us | Bricoc Golf Carts',
+        'name': 'Contact Bricoc | Golf Bags & Accessories',
         'description':
-          'Contact the Bricoc customer support team. Reach our golf cart specialists by phone, email, or send us a direct message.',
+          'Contact Bricoc support with questions about golf bags, gloves, golf ball accessories, orders, shipping, or returns.',
         'mainEntity': {
           '@id': 'https://bricoc.com/#organization',
         },
@@ -35,11 +35,11 @@ export default function ContactPage() {
         'name': 'Bricoc',
         'url': 'https://bricoc.com',
         'email': 'contact@bricoc.com',
-        'telephone': ['+19129231747'],
+        'telephone': ['+19786649000'],
         'contactPoint': [
           {
             '@type': 'ContactPoint',
-            'telephone': '+19129231747',
+            'telephone': '+19786649000',
             'contactType': 'customer service',
             'areaServed': ['US'],
             'availableLanguage': ['en'],
@@ -103,7 +103,7 @@ export default function ContactPage() {
             <div className="p-6 sm:p-8">
               <h1 className="text-3xl font-bold text-[#233F31] mb-2 font-heading">Contact Bricoc</h1>
               <p className="text-gray-600 mb-8 text-sm sm:text-base">
-                Have questions about our electric golf carts, custom builds, delivery, or warranty? Send us a message and our team will get back to you promptly.
+                Have a question about a golf bag, glove, golf ball accessory, or order? Send Bricoc a message and our team will respond.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Contact Form */}
@@ -153,12 +153,10 @@ export default function ContactPage() {
                         disabled={isSending}
                       >
                         <option value="">Select a reason</option>
-                        <option value="custom-build">Custom Golf Cart Build</option>
+                        <option value="product-question">Product Question</option>
                         <option value="order-inquiry">Order & Delivery Status</option>
                         <option value="track-order">Track My Order</option>
-                        <option value="warranty-service">Warranty & Parts Support</option>
                         <option value="return-refund">Return or Exchange</option>
-                        <option value="dealership">Commercial & Fleet Inquiry</option>
                         <option value="general">General Question</option>
                       </select>
                     </div>
@@ -220,7 +218,7 @@ export default function ContactPage() {
                       <Phone className="h-5 w-5 text-[#789676] mt-1 shrink-0" />
                       <div className="ml-3">
                         <h3 className="font-semibold text-[#233F31]">Phone Support</h3>
-                        <p className="text-gray-600 mt-0.5"><span className="font-medium text-[#233F31]">Direct:</span> +19129231747</p>
+                        <p className="text-gray-600 mt-0.5"><span className="font-medium text-[#233F31]">Direct:</span> +1(978) 664-9000</p>
                       </div>
                     </div>
                     <div className="flex items-start">

@@ -25,7 +25,7 @@ const FeaturedProduct: React.FC<FeaturedProductProps> = ({ product }) => {
         <div className="absolute left-4 top-4 z-10 rounded-full bg-[#233F31] px-3 py-1 text-sm font-medium text-[#FAF6EB] shadow-sm">
           <div className="flex items-center gap-1">
             <Award className="h-4 w-4 text-[#789676]" />
-            <span>Featured Cart</span>
+            <span>Featured Product</span>
           </div>
         </div>
         <div className="relative w-full aspect-square md:h-full md:aspect-auto bg-[#FAF6EB]/40">

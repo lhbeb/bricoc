@@ -100,9 +100,9 @@ export default function SellerBadge({ sellerId, size = 'sm' }: SellerBadgeProps)
         {/* Tooltip for md size */}
         <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-72 p-4 bg-white text-gray-600 text-sm leading-relaxed rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform origin-top translate-y-2 group-hover:translate-y-0 text-left">
           <div className="font-bold mb-1.5 flex items-center gap-1.5 text-[#233F31]">
-            <ShieldCheck className="w-4 h-4 text-[#789676]" /> Verified Bricoc Manufacturer
+            <ShieldCheck className="w-4 h-4 text-[#789676]" /> Bricoc Store
           </div>
-          Authentic Bricoc golf carts and official replacement parts backed by our comprehensive warranty and dedicated customer service.
+          Browse current Bricoc product listings and contact store support with product or order questions.
         </div>
       </div>
 

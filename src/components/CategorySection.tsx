@@ -16,11 +16,11 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({
   products,
-  title = 'Featured Bricoc Golf Carts',
-  subtitle = 'Engineered for smooth rides, exceptional battery life, and modern comfort.',
+  title = 'Featured Golf Bags & Accessories',
+  subtitle = 'Browse the golf gear currently listed in the Bricoc catalog.',
   maxDisplay = 8,
   shuffleForVisitor = false,
-  visitorShuffleKey = 'home-featured-carts',
+  visitorShuffleKey = 'home-featured-golf-gear',
 }) => {
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>(() =>
     products.slice(0, maxDisplay),
@@ -46,7 +46,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   }
 
   return (
-    <section id="featured-carts" className="py-16 bg-white">
+    <section id="featured-products" className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="w-full max-w-7xl mx-auto">
           <div className="mb-10 text-left">

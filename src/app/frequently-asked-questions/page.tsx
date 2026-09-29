@@ -4,9 +4,9 @@ import { ArrowRight, HelpCircle, Plus } from 'lucide-react';
 import { STORE_FAQS } from '@/lib/storeFaqs';
 
 export const metadata: Metadata = {
-  title: 'Frequently Asked Questions | Bricoc Golf Carts',
+  title: 'Frequently Asked Questions | Bricoc Golf Bags & Accessories',
   description:
-    'Find answers about Bricoc golf carts, electric models, custom builds, delivery, warranty, returns, and support.',
+    'Find answers about Bricoc golf bags, leather gloves, golf ball accessories, ordering, shipping, returns, and support.',
   alternates: {
     canonical: 'https://bricoc.com/frequently-asked-questions',
   },
@@ -42,7 +42,7 @@ export default function FrequentlyAskedQuestionsPage() {
             Frequently Asked Questions
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[#FAF6EB]/80 sm:text-lg">
-            Straightforward answers about our golf carts, battery specs, custom options, delivery, and warranty support at Bricoc.
+            Answers about the golf bags and accessories currently listed by Bricoc, plus ordering, shipping, returns, and customer support.
           </p>
         </div>
       </section>
@@ -77,16 +77,16 @@ export default function FrequentlyAskedQuestionsPage() {
 
           <div className="mt-10 flex flex-col items-start justify-between gap-5 rounded-2xl bg-[#233F31] p-6 text-[#FAF6EB] sm:flex-row sm:items-center sm:p-8 shadow-lg">
             <div>
-              <h2 className="text-xl font-bold sm:text-2xl text-white font-heading">Still have questions about our golf carts?</h2>
+              <h2 className="text-xl font-bold sm:text-2xl text-white font-heading">Need help with a product or order?</h2>
               <p className="mt-2 text-sm text-[#FAF6EB]/80 sm:text-base">
-                Speak directly with a Bricoc golf cart expert today.
+                Contact Bricoc support with your product or order question.
               </p>
             </div>
             <Link
               href="/contact"
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#FAF6EB] px-6 py-3 text-sm font-bold text-[#233F31] transition-colors hover:bg-white shadow-sm"
             >
-              Contact Specialists
+              Contact Support
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>

@@ -24,7 +24,7 @@ const InstagramWidget: React.FC = () => {
           {/* Profile Details */}
           <div>
             <h3 className="font-bold text-[#233F31] text-lg mb-0.5">@bricocofficial</h3>
-            <p className="text-gray-600 text-sm mb-2">Bricoc Golf Carts</p>
+            <p className="text-gray-600 text-sm mb-2">Bricoc Golf Gear</p>
 
             {/* Statistics */}
             <div className="flex items-center space-x-4 text-sm">

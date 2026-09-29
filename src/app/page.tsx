@@ -5,24 +5,26 @@ import ProductGrid from '@/components/ProductGrid';
 import HomeReviews from '@/components/HomeReviews';
 import CategorySection from '@/components/CategorySection';
 import PopularCategories from '@/components/PopularCategories';
-import { getFeaturedProducts, getProducts } from '@/lib/data';
+import { getFeaturedProducts } from '@/lib/data';
 import { homeReviews, homeReviewsStats } from '@/lib/homeReviews';
 import ScrollToTop from '@/components/ScrollToTop';
 import { FEATURED_PRODUCT_LIMIT } from '@/config/products';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
   try {
-    const [featuredProducts, products] = await Promise.all([
-      getFeaturedProducts(),
-      getProducts(),
-    ]);
-
-    const golfBags = products.filter(p =>
-      p.category?.toLowerCase().includes('bag') ||
-      p.title?.toLowerCase().includes('bag')
+    const featuredProducts = (await getFeaturedProducts()).filter(
+      product => product.isFeatured === true,
     );
 
-    const accessoriesAndParts = products.filter((product) =>
+    const golfBags = featuredProducts.filter(product =>
+      /\bgolf bags?\b/i.test(product.category || '') ||
+      /\bgolf bags?\b/i.test(product.title || '')
+    );
+
+    const accessoriesAndParts = featuredProducts.filter((product) =>
       product.category?.toLowerCase().includes('hardware') ||
       product.category?.toLowerCase().includes('accessories') ||
       product.collections?.includes('power-tools')
@@ -33,14 +35,14 @@ export default async function HomePage() {
       <Suspense fallback={null}>
         <ScrollToTop />
       </Suspense>
-      <Hero />
+      <Hero products={featuredProducts} />
 
-      <PopularCategories products={products} />
+      <PopularCategories products={featuredProducts} />
 
       <CategorySection
-        products={featuredProducts.length > 0 ? featuredProducts : products}
-        title="Featured Bricoc Lineup"
-        subtitle="Precision engineered golf carts built for golf courses, resort communities, and private estates."
+        products={featuredProducts}
+        title="Featured Golf Bags & Accessories"
+        subtitle="Explore the golf bags, leather gloves, and ball accessories currently available from Bricoc."
         maxDisplay={FEATURED_PRODUCT_LIMIT}
         shuffleForVisitor
         visitorShuffleKey="home-featured"
@@ -55,9 +57,9 @@ export default async function HomePage() {
             sectionId="bricoc-golf-bags"
             title="Premium Bricoc Golf Bags"
             editorialCard={{
-              title: 'Master Every Fairway',
+              title: 'Gear Up for Your Round',
               description:
-                'Bricoc golf bags combine lightweight durability, superior club organization, and premium materials. Experience effortless carrying and smart storage designed for the modern golfer.',
+                'Browse Bricoc golf bags with club organization and storage, alongside accessories for carrying and organizing golf balls.',
             }}
             randomizeForVisitor
             visitorShuffleKey="home-golf-bags"

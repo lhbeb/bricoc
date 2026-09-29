@@ -13,7 +13,7 @@ const catalogNavigation = [
   { label: 'All Products', href: '/search?query=golf' },
   { label: 'Golf Accessories', href: '/search?category=Golf%20Accessories' },
   { label: 'Golf Bags', href: '/search?category=Golf%20Bags' },
-  { label: 'Featured Products', href: '/#featured-carts' },
+  { label: 'Featured Products', href: '/#featured-products' },
   { label: 'Track Order', href: '/track' },
   { label: 'FAQs', href: '/frequently-asked-questions' },
   { label: 'Contact', href: '/contact' },
@@ -41,8 +41,8 @@ const Header = () => {
   const isCheckoutPage = pathname === '/checkout';
 
   const announcements = [
-    <span key="nav-1">🚚 <span className="font-bold">Free Nationwide Delivery</span> On All Bricoc Golf Carts ⛳</span>,
-    <span key="nav-2">⚡ <span className="font-bold">Premium Lithium Power</span> & <span className="font-bold">3-Year Warranty</span></span>,
+    <span key="nav-1">🚚 <span className="font-bold">Free Standard Shipping</span> Across the United States</span>,
+    <span key="nav-2">⛳ <span className="font-bold">Shop Golf Bags, Leather Gloves</span> & Golf Ball Accessories</span>,
     "live-chat" // Special marker for live chat announcement
   ];
 
@@ -206,7 +206,7 @@ const Header = () => {
                 >
                   <input
                     type="text"
-                    placeholder="Search golf carts, bags, gloves, accessories..."
+                    placeholder="Search golf bags, gloves, and accessories..."
                     className="flex-1 bg-transparent outline-none text-sm text-[#233F31] placeholder-[#233F31]/60 cursor-pointer font-medium"
                     readOnly
                   />
@@ -221,7 +221,7 @@ const Header = () => {
                   <button
                     onClick={() => setIsSearchOpen(true)}
                     className="lg:hidden text-white hover:text-[#FAF6EB] p-2 transition-colors duration-200"
-                    aria-label="Search golf carts"
+                    aria-label="Search golf equipment"
                   >
                     <Search className="h-5 w-5" />
                   </button>

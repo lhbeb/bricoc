@@ -252,7 +252,7 @@ function ThankYouContent() {
           <div className="bg-[#FAF6EB] border border-[#789676]/30 rounded-xl p-6 mb-8">
             <h3 className="font-semibold text-[#233F31] mb-2">Need Help?</h3>
             <p className="text-sm text-gray-600 mb-3">
-              If you have any questions about your golf cart order, don&apos;t hesitate to reach out:
+              If you have any questions about your order, don&apos;t hesitate to reach out:
             </p>
             <div className="space-y-1 text-sm">
               <p className="text-gray-700">
@@ -261,8 +261,8 @@ function ThankYouContent() {
                 </a>
               </p>
               <p className="text-gray-700">
-                📞 <a href="tel:+19129231747" className="text-[#233F31] hover:text-[#789676] font-medium">
-                  +19129231747
+                📞 <a href="tel:+19786649000" className="text-[#233F31] hover:text-[#789676] font-medium">
+                  +1(978) 664-9000
                 </a>
               </p>
             </div>

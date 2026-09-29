@@ -17,9 +17,9 @@ import LiveChatWidget from "@/components/LiveChatWidget";
 import GoogleTagTracker from "@/components/GoogleTagTracker";
 
 export const metadata: Metadata = {
-  title: "Bricoc - Premium Electric & Luxury Golf Carts",
-  description: "Explore premium electric golf carts, luxury 4-passenger and 6-passenger carts, and custom utility vehicles at Bricoc. Engineered for performance, comfort, and reliability with nationwide delivery.",
-  keywords: "Bricoc, golf carts, electric golf carts, luxury golf carts, street legal golf carts, 4 seater golf carts, 6 passenger golf cart, custom golf carts, golf cart parts, lithium golf carts",
+  title: "Bricoc | Golf Bags, Gloves & Accessories",
+  description: "Shop Bricoc golf bags, leather golf gloves, and golf ball carriers and dispensers. Browse current product details and availability online.",
+  keywords: "Bricoc, golf bags, golf stand bags, golf cart bags, leather golf gloves, golf ball carriers, golf ball dispensers, golf accessories",
   authors: [{ name: "Bricoc" }],
   creator: "Bricoc",
   publisher: "Bricoc",
@@ -30,16 +30,14 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://bricoc.com"),
   openGraph: {
-    title: "Bricoc - Premium Electric & Luxury Golf Carts",
-    description: "Shop premium electric golf carts, luxury 4-passenger and 6-passenger models, and accessories at Bricoc.",
+    title: "Bricoc | Golf Bags, Gloves & Accessories",
+    description: "Shop Bricoc golf bags, leather golf gloves, and golf ball accessories.",
     url: "https://bricoc.com",
     siteName: "Bricoc",
     images: [
       {
-        url: "/bg.png",
-        width: 1200,
-        height: 630,
-        alt: "Bricoc - Premium Electric Golf Carts",
+        url: "/logo.png",
+        alt: "Bricoc",
       },
     ],
     locale: "en_US",
@@ -47,9 +45,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bricoc - Premium Electric & Luxury Golf Carts",
-    description: "Shop premium electric golf carts, luxury 4-passenger and 6-passenger models, and accessories at Bricoc.",
-    images: ["/bg.png"],
+    title: "Bricoc | Golf Bags, Gloves & Accessories",
+    description: "Shop Bricoc golf bags, leather golf gloves, and golf ball accessories.",
+    images: ["/logo.png"],
   },
   icons: {
     icon: [
@@ -143,7 +141,7 @@ export default function RootLayout({
                 "name": "Bricoc",
                 "url": "https://bricoc.com",
                 "logo": "https://bricoc.com/logosvg.svg",
-                "description": "Bricoc - Premium Electric & Luxury Golf Carts. Discover reliable electric, 4-seater, 6-seater, and custom golf carts.",
+                "description": "Bricoc offers golf bags, leather golf gloves, and golf ball carriers and dispensers.",
                 "sameAs": [
                   "https://www.tiktok.com/@bricoc_officiel",
                   "https://www.instagram.com/bricocofficial/",
@@ -153,7 +151,7 @@ export default function RootLayout({
                   "@type": "ContactPoint",
                   "contactType": "customer service",
                   "email": "contact@bricoc.com",
-                  "telephone": "+19129231747",
+                  "telephone": "+19786649000",
                   "areaServed": ["US"]
                 },
                 "address": {
@@ -180,7 +178,7 @@ export default function RootLayout({
                 "@type": "WebSite",
                 "name": "Bricoc",
                 "url": "https://bricoc.com",
-                "description": "Bricoc - Premium Electric & Luxury Golf Carts.",
+                "description": "Browse Bricoc golf bags, gloves, and golf ball accessories.",
                 "potentialAction": {
                   "@type": "SearchAction",
                   "target": {

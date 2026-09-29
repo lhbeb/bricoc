@@ -65,7 +65,7 @@ const NewsletterSection = () => {
           </h2>
 
           <p className="text-base md:text-lg text-[#FAF6EB]/85 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Get exclusive access to new golf cart releases, custom build options, lithium battery upgrades, and seasonal promotions.
+            Get updates about Bricoc golf bags, gloves, golf ball accessories, product availability, and store news.
           </p>
 
           <form onSubmit={handleSubmit} className="max-w-md mx-auto">

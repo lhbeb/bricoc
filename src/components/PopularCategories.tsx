@@ -3,17 +3,8 @@ import Link from 'next/link';
 import type { Product } from '@/types/product';
 
 const POPULAR_CATEGORY_NAMES = [
-  'Golf Carts',
   'Golf Bags',
-  'Golf Gloves',
-  'Golf Clubs',
-  'Accessories & Parts',
   'Golf Accessories',
-  'Golf Apparel',
-  'Electric Golf Carts',
-  '4-Passenger Carts',
-  '6-Passenger Carts',
-  'Utility Carts',
 ] as const;
 
 interface PopularCategoriesProps {

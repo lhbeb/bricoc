@@ -27,7 +27,7 @@ const InstagramSection: React.FC = () => {
                 {/* Profile Details */}
                 <div className="flex-grow">
                   <h3 className="font-bold text-[#233F31] text-lg sm:text-xl mb-0.5">@bricocofficial</h3>
-                  <p className="text-gray-600 text-sm sm:text-base mb-2">Bricoc Golf Carts</p>
+                  <p className="text-gray-600 text-sm sm:text-base mb-2">Bricoc Golf Gear</p>
 
                   {/* Statistics */}
                   <div className="flex items-center space-x-4 sm:space-x-6 text-sm">

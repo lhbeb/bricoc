@@ -12,9 +12,8 @@ interface SearchPageClientProps {
 }
 
 const CATALOG_CATEGORIES = [
-  "2-Seater Golf Carts",
-  "4-Seater Golf Carts",
-  "6-Seater Golf Carts",
+  "Golf Accessories",
+  "Golf Bags",
 ] as const;
 
 function getExactCatalogCategory(value: string): string {

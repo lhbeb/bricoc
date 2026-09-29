@@ -22,7 +22,7 @@ const Footer = () => {
               />
             </Link>
             <p className="mb-4 text-[#FAF6EB]/90 text-sm leading-relaxed">
-              Bricoc is a premier golf cart brand dedicated to manufacturing exceptional electric, luxury, and street-legal golf carts designed for comfort, power, and everyday convenience.
+              Browse Bricoc golf bags, leather golf gloves, and accessories for carrying and organizing golf balls.
             </p>
             <div className="space-y-2.5 text-sm">
               <div className="flex items-center">
@@ -60,8 +60,8 @@ const Footer = () => {
             <h3 className="text-base font-semibold text-white mb-4 tracking-wide uppercase">Navigation</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:text-white hover:underline transition-colors duration-200">Home</Link></li>
-              <li><Link href="/#products" className="hover:text-white hover:underline transition-colors duration-200">Golf Carts & Inventory</Link></li>
-              <li><Link href="/#featured" className="hover:text-white hover:underline transition-colors duration-200">Featured Models</Link></li>
+              <li><Link href="/search?query=golf" className="hover:text-white hover:underline transition-colors duration-200">Golf Bags & Accessories</Link></li>
+              <li><Link href="/#featured-products" className="hover:text-white hover:underline transition-colors duration-200">Featured Products</Link></li>
               <li><Link href="/track" className="hover:text-white hover:underline transition-colors duration-200">Track Order</Link></li>
               <li><Link href="/contact" className="hover:text-white hover:underline transition-colors duration-200">Contact Us</Link></li>
             </ul>

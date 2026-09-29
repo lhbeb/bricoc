@@ -1,21 +1,30 @@
 "use client";
 
 import Image from 'next/image';
+import Link from 'next/link';
 import React, { useEffect, useRef } from 'react';
+import type { Product } from '@/types/product';
 
-const Hero = () => {
+interface HeroProps {
+  products?: Product[];
+}
+
+const Hero = ({ products = [] }: HeroProps) => {
   const typingTextRef = useRef<HTMLSpanElement>(null);
   const placeholder = '\u00a0';
+  const heroProduct = products.find(
+    (product) => product.category?.trim().toLowerCase() === 'golf bags' && product.images?.[0],
+  ) || products.find((product) => product.images?.[0]);
 
   useEffect(() => {
     const element = typingTextRef.current;
     if (!element) return;
 
     const words = [
-      'Electric Golf Carts',
-      'Luxury 4-Passenger Carts',
-      '6-Passenger Street Carts',
-      'All-Terrain Utility Carts'
+      'Golf Bags',
+      'Leather Golf Gloves',
+      'Golf Ball Carriers',
+      'Golf Ball Dispensers'
     ];
     let isAnimating = true;
     let currentIndex = 0;
@@ -85,27 +94,34 @@ const Hero = () => {
                 {placeholder}
               </span>
               <span className="block leading-tight text-white">
-                Elevate Your Ride With Premium Electric Golf Carts
+              Golf Bags & Accessories for Your Game
               </span>
             </h1>
 
             {/* Description */}
             <p className="mt-4 max-w-[580px] text-sm leading-relaxed text-[#FAF6EB]/85 md:text-base">
-              Experience the pinnacle of comfort, range, and style. Our premium Bricoc golf carts feature cutting-edge lithium technology, custom seating, and road-ready versatility.
+              Browse the Bricoc catalog for golf stand bags, cart bags, leather gloves, and practical accessories for carrying and organizing golf balls.
             </p>
+            <Link
+              href="/search?query=golf"
+              className="mt-6 inline-flex w-fit items-center justify-center rounded-full bg-[#789676] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#688566]"
+            >
+              Shop Current Products
+            </Link>
           </div>
 
           {/* Image panel */}
-          <div className="relative order-1 min-h-[280px] overflow-hidden md:order-2 md:min-h-0 bg-[#233F31]/20">
-            <Image
-              src="/bg.png"
-              alt="Bricoc luxury electric golf cart"
-              fill
-              priority
-              sizes="(max-width: 767px) 100vw, 50vw"
-              className="object-cover object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#233F31]/60 via-transparent to-transparent" aria-hidden="true" />
+          <div className="relative order-1 min-h-[280px] overflow-hidden bg-white md:order-2 md:min-h-0">
+            {heroProduct?.images[0] && (
+              <Image
+                src={heroProduct.images[0]}
+                alt={heroProduct.title}
+                fill
+                priority
+                sizes="(max-width: 767px) 100vw, 50vw"
+                className="object-contain p-6 sm:p-10"
+              />
+            )}
           </div>
         </div>
       </div>

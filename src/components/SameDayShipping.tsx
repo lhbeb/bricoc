@@ -20,7 +20,7 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
           <div className="relative min-h-[360px] w-full md:min-h-[400px] md:w-[45%]">
             <Image
               src="/delivery-guy.png"
-              alt="Bricoc golf cart delivery service"
+              alt="Bricoc order delivery"
               fill
               sizes="(max-width: 768px) 100vw, 45vw"
               className="object-cover object-center"
@@ -31,11 +31,11 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
           {/* Right Section - Content */}
           <div className="md:w-[55%] bg-[#233F31] text-[#FAF6EB] p-8 sm:p-12 flex flex-col justify-center">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-white">
-              Same-Day Dispatch & Delivery
+              Shipping & Delivery Information
             </h2>
 
             <p className="text-base sm:text-lg leading-relaxed font-normal mb-8 text-[#FAF6EB]/90">
-              Place your golf cart or accessory order and our dedicated logistics team will inspect, secure, and dispatch your delivery with trusted enclosed freight carriers. At <strong>Bricoc</strong>, dependable fulfillment is guaranteed.
+              Bricoc currently lists golf bags, leather gloves, and golf ball accessories. Review the shipping policy for destinations, processing details, delivery estimates, and tracking information for your order.
             </p>
             <Link
               href="/shipping-policy"
@@ -60,7 +60,7 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
                 Fast Processing
               </h3>
               <p className="text-gray-600 text-sm">
-                Orders placed before 2:00 PM EST begin fulfillment and pre-delivery inspection that same day.
+                Check the shipping policy for the current order processing schedule and cutoff details.
               </p>
             </div>
           </div>
@@ -74,10 +74,10 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
             </div>
             <div>
               <h3 className="font-bold text-[#233F31] text-lg mb-2">
-                30-Day Guarantee
+                Returns
               </h3>
               <p className="text-gray-600 text-sm">
-                Enjoy total confidence with our 30-day money-back return policy on all eligible purchases.
+                Review the return policy for eligibility, timelines, and instructions before starting a return.
               </p>
             </div>
           </div>
@@ -91,10 +91,10 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
             </div>
             <div>
               <h3 className="font-bold text-[#233F31] text-lg mb-2">
-                Live Carrier Tracking
+                Order Tracking
               </h3>
               <p className="text-gray-600 text-sm">
-                Real-time tracking updates delivered directly to your inbox from dispatch to your driveway.
+                Use the tracking information from your shipping confirmation or visit the order tracking page.
               </p>
             </div>
           </div>
@@ -105,17 +105,17 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
       <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 border border-[#233F31]/10">
         <div>
           <p className="text-gray-500 text-sm mb-1">
-            Ready to experience the Bricoc difference?
+            Looking for golf gear for your next round?
           </p>
           <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#233F31]">
-            Order today for <span className="text-[#789676]">fast nationwide delivery</span>
+            Browse golf bags, gloves, and <span className="text-[#789676]">golf ball accessories</span>
           </p>
         </div>
         <a
-          href="#products"
+          href="/search?query=golf"
           className="bg-[#233F31] hover:bg-[#1a3025] text-[#FAF6EB] font-bold py-3.5 px-8 rounded-full text-base sm:text-lg transition-colors whitespace-nowrap shadow-sm"
         >
-          Browse Golf Carts
+          Browse Golf Products
         </a>
       </div>
     </div>

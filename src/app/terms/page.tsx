@@ -195,7 +195,7 @@ const TermsPage = () => {
             <div className="bg-gray-50 rounded-lg p-6 space-y-3">
               <div>
                 <div className="font-medium text-[#262626] mb-1">Phone:</div>
-                <div className="text-gray-600">+19129231747</div>
+                <div className="text-gray-600">+1(978) 664-9000</div>
               </div>
               <div>
                 <div className="font-medium text-[#262626] mb-1">Email:</div>

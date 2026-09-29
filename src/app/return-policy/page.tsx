@@ -180,7 +180,7 @@ export default function ReturnPolicyPage() {
             <p>All returns are handled <strong>by mail</strong>. Here&apos;s how it works:</p>
             <ol className="list-decimal pl-6 space-y-3">
               <li>
-                <strong>Contact us</strong> at <a href="mailto:contact@bricoc.com" className="text-blue-600 hover:underline font-semibold">contact@bricoc.com</a> or call <span className="font-semibold">+19129231747</span>.
+                <strong>Contact us</strong> at <a href="mailto:contact@bricoc.com" className="text-blue-600 hover:underline font-semibold">contact@bricoc.com</a> or call <span className="font-semibold">+1(978) 664-9000</span>.
               </li>
               <li>
                 <strong>Get your free return label</strong>. We&apos;ll email you a prepaid label after approving your return request.
@@ -246,7 +246,7 @@ export default function ReturnPolicyPage() {
                   <span>Phone</span>
                 </div>
                 <div className="text-sm text-gray-600 pl-7 space-y-1">
-                  <div>+19129231747</div>
+                  <div>+1(978) 664-9000</div>
                 </div>
 
                 <div className="flex items-center gap-2 font-bold text-[#233F31] pt-2">
