@@ -29,14 +29,15 @@ export interface AdminPermission {
 // ============================================
 // HARDCODED ADMIN CREDENTIALS
 // ============================================
-// These are the two admin accounts with hardcoded passwords
+// These are the two admin accounts with hardcoded passwords.
+// Both accounts intentionally receive the same full-access role.
 // Passwords are hashed using bcrypt for security
 
 const ADMIN_CREDENTIALS = {
     REGULAR_ADMIN: {
         email: 'elmahboubimehdi@gmail.com',
         password: 'Localserver!!2',
-        role: 'REGULAR_ADMIN' as AdminRole,
+        role: 'SUPER_ADMIN' as AdminRole,
     },
     SUPER_ADMIN: {
         email: 'Matrix01mehdi@gmail.com',
@@ -119,11 +120,11 @@ export async function authenticateAdmin(
 
         if (fetchError || !existingAdmin) {
             // Create admin user in database
-            const role = isSuperAdmin ? 'SUPER_ADMIN' : 'REGULAR_ADMIN';
+            const role: AdminRole = 'SUPER_ADMIN';
             const passwordHash = await hashPassword(password);
 
-            const displayName = isRegularAdmin ? 'Regular Admin' : 'Super Admin';
-            const department = isRegularAdmin ? 'Operations' : 'System Administration';
+            const displayName = 'Super Admin';
+            const department = 'System Administration';
 
             const { data: newAdmin, error: createError } = await supabaseAdmin
                 .from('admin_roles')
@@ -151,7 +152,11 @@ export async function authenticateAdmin(
             // Update last login
             const { data: updatedAdmin, error: updateError } = await supabaseAdmin
                 .from('admin_roles')
-                .update({ last_login: new Date().toISOString() })
+                .update({
+                    role: 'SUPER_ADMIN',
+                    is_active: true,
+                    last_login: new Date().toISOString(),
+                })
                 .eq('id', existingAdmin.id)
                 .select()
                 .single();
