@@ -90,7 +90,7 @@ export default function AboutPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-white font-heading">About Bricoc Golf Gear</h1>
           <p className="text-lg sm:text-xl text-[#FAF6EB]/90 leading-relaxed max-w-3xl mx-auto">
-            Bricoc's current catalog features golf bags, leather golf gloves, and golf ball carriers and dispensers. Review each listing for its product details, price, images, and availability.
+            Bricoc&apos;s current catalog features golf bags, leather golf gloves, and golf ball carriers and dispensers. Review each listing for its product details, price, images, and availability.
           </p>
         </div>
       </div>
