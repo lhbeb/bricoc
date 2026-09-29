@@ -10,11 +10,10 @@ import ClientOnly from './ClientOnly';
 import SearchBar from './SearchBar';
 
 const catalogNavigation = [
-  { label: 'All Carts', href: '/#products' },
-  { label: '2-Seater Golf Carts', href: '/search?category=2-Seater%20Golf%20Carts' },
-  { label: '4-Seater Golf Carts', href: '/search?category=4-Seater%20Golf%20Carts' },
-  { label: '6-Seater Golf Carts', href: '/search?category=6-Seater%20Golf%20Carts' },
-  { label: 'Featured', href: '/#featured' },
+  { label: 'All Products', href: '/search?query=golf' },
+  { label: 'Golf Accessories', href: '/search?category=Golf%20Accessories' },
+  { label: 'Golf Bags', href: '/search?category=Golf%20Bags' },
+  { label: 'Featured Products', href: '/#featured-carts' },
   { label: 'Track Order', href: '/track' },
   { label: 'FAQs', href: '/frequently-asked-questions' },
   { label: 'Contact', href: '/contact' },
@@ -319,19 +318,6 @@ const Header = () => {
                     {item.label}
                   </Link>
                 ))}
-                <div className="border-t border-[#233F31]/10 my-2 pt-2" />
-                <Link href="/#featured" className="py-2.5 px-3 text-[#233F31] hover:bg-[#789676]/10 rounded-lg font-medium transition-colors" onClick={handleMobileMenuClose}>
-                  Featured Carts
-                </Link>
-                <Link href="/track" className="py-2.5 px-3 text-[#233F31] hover:bg-[#789676]/10 rounded-lg font-medium transition-colors" onClick={handleMobileMenuClose}>
-                  Track Order
-                </Link>
-                <Link href="/frequently-asked-questions" className="py-2.5 px-3 text-[#233F31] hover:bg-[#789676]/10 rounded-lg font-medium transition-colors" onClick={handleMobileMenuClose}>
-                  FAQs
-                </Link>
-                <Link href="/contact" className="py-2.5 px-3 text-[#233F31] hover:bg-[#789676]/10 rounded-lg font-medium transition-colors" onClick={handleMobileMenuClose}>
-                  Contact Us
-                </Link>
               </nav>
             </div>
           </div>
@@ -355,12 +341,6 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/#featured"
-                className="flex-shrink-0 whitespace-nowrap rounded-full bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-medium text-white transition-colors duration-200"
-              >
-                Featured
-              </Link>
             </nav>
           </div>
         </div>

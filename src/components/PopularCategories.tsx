@@ -48,12 +48,12 @@ export default function PopularCategories({ products }: PopularCategoriesProps) 
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-5">
             {categories.map((category) => (
               <Link
                 key={category.name}
                 href={`/search?category=${encodeURIComponent(category.name)}`}
-                className="relative overflow-hidden rounded-2xl border border-[#233F31]/15 bg-white shadow-sm transition-all duration-200 hover:border-[#789676] hover:shadow-md group"
+                className="group relative min-w-0 max-w-[280px] flex-[1_1_145px] overflow-hidden rounded-2xl border border-[#233F31]/15 bg-white shadow-sm transition-all duration-200 hover:border-[#789676] hover:shadow-md sm:flex-[1_1_200px]"
                 aria-label={`Shop ${category.name}`}
               >
                 <div className="relative aspect-square overflow-hidden bg-[#FAF6EB]/40 p-3 sm:p-5">
