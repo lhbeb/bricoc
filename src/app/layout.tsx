@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
@@ -16,14 +15,6 @@ import { AdminRouteCheck, PublicRouteOnly, AdminRouteOnly, CheckoutRouteOnly } f
 import GlobalErrorReporter from "@/components/GlobalErrorReporter";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import GoogleTagTracker from "@/components/GoogleTagTracker";
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Bricoc - Premium Electric & Luxury Golf Carts",
@@ -129,7 +120,7 @@ export default function RootLayout({
           />
         </noscript>
       </head>
-      <body suppressHydrationWarning className={`${dmSans.variable} font-sans antialiased text-[#233F31] bg-[#FAF6EB]`}>
+      <body suppressHydrationWarning className="font-sans antialiased text-[#233F31] bg-[#FAF6EB]">
         <GlobalErrorReporter />
         <Suspense fallback={null}>
           <FacebookPixel />
