@@ -120,7 +120,7 @@ const TermsPage = () => {
             <ul className="list-disc pl-6 space-y-2">
               <li>Same-day shipping is available for orders placed before 2:00 PM EST.</li>
               <li>Standard processing time is 0 to 1 business day.</li>
-              <li>Domestic USA delivery time is 5 to 9 business days.</li>
+              <li>Domestic USA delivery time is 3 to 4 business days.</li>
               <li>All orders qualify for free standard shipping with no minimum spend required.</li>
               <li>Tracking information is sent to the customer via email once the order ships.</li>
             </ul>

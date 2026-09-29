@@ -103,9 +103,9 @@ if (paymentSuccess) {
 
 | Step | Icon | Title | Description |
 |------|------|-------|-------------|
-| 1 | 🕐 | Order Processing | "We'll process your order within 24-48 hours" |
+| 1 | 🕐 | Order Processing | "We'll process your order within 0-1 business day" |
 | 2 | 📧 | Email Confirmation | "You'll receive an email with your order tracking number" |
-| 3 | 📦 | Shipping | "Your order will ship within 5-8 business days" |
+| 3 | 📦 | Shipping | "Your order will ship within 3-4 business days" |
 
 ### **Contact Information:**
 - **Email**: support@hoodfair.com

@@ -30,12 +30,12 @@ export const MARKETS: Record<MarketKey, MarketConfig> = {
     locale: 'en-US',
     shipsFrom: 'United States',
     shipsFromFlag: '🇺🇸',
-    deliveryDaysMin: 5,
-    deliveryDaysMax: 8,
+    deliveryDaysMin: 3,
+    deliveryDaysMax: 4,
     freeShippingText: 'Free standard shipping',
     returnsText: '30-day returns',
     faqShippingAnswer:
-      'Orders placed before 2:00 PM EST often ship the same day. Standard processing is 1 business day, then most US deliveries arrive in 5 to 8 business days and Canada in 7 to 10 business days.',
+      'Orders placed before 2:00 PM EST often ship the same day. Standard processing is 0 to 1 business day, then most US deliveries arrive in 3 to 4 business days. Canada delivery times vary by destination.',
     faqFreeShippingAnswer:
       'Yes, standard shipping is currently free across the United States and Canada. If faster delivery is available, you\'ll see those options at checkout.',
   },

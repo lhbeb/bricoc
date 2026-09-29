@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const timeline = [
   ['Same-day orders', 'Ships same day when placed before 2:00 PM EST'],
   ['Standard processing', '0-1 business day'],
-  ['Domestic USA delivery', '5-9 business days (Free Standard Shipping)'],
+  ['Domestic USA delivery', '3-4 business days (Free Standard Shipping)'],
 ];
 
 const policySections = [
@@ -86,8 +86,8 @@ export default function ShippingPolicyPage() {
           },
           'transitTime': {
             '@type': 'QuantitativeValue',
-            'minValue': 5,
-            'maxValue': 9,
+            'minValue': 3,
+            'maxValue': 4,
             'unitCode': 'DAY',
           },
           'cutoffTime': '14:00:00-05:00',

@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
                   ⚠️ Action Required
                 </h2>
                 <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
-                  Please process this order and prepare it for shipping. The customer is expecting delivery within 5-9 business days.
+                  Please process this order and prepare it for shipping. The customer is expecting delivery within 3-4 business days.
                 </p>
               </div>
             </td>

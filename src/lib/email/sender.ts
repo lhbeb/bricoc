@@ -496,7 +496,7 @@ export async function sendStripePaymentSuccessEmail(
           <!-- Action Required Banner -->
           <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:16px 20px;">
             <p style="margin:0;font-size:14px;font-weight:700;color:#c2410c;">⚡ Action Required</p>
-            <p style="margin:6px 0 0;font-size:13px;color:#9a3412;line-height:1.6;">Please process and dispatch this order. The customer expects delivery within 5–8 business days.</p>
+            <p style="margin:6px 0 0;font-size:13px;color:#9a3412;line-height:1.6;">Please process and dispatch this order. The customer expects delivery within 3–4 business days.</p>
           </div>
 
         </td></tr>
@@ -586,7 +586,7 @@ export async function sendStripePaymentSuccessEmail(
               <td style="padding:12px 16px;vertical-align:top;font-size:18px;">🚚</td>
               <td style="padding:12px 16px;">
                 <strong style="font-size:14px;color:#111827;">Delivery</strong>
-                <p style="margin:2px 0 0;font-size:13px;color:#6b7280;">Expected within 5–8 business days from dispatch.</p>
+                <p style="margin:2px 0 0;font-size:13px;color:#6b7280;">Expected within 3–4 business days from dispatch.</p>
               </td>
             </tr>
           </table>

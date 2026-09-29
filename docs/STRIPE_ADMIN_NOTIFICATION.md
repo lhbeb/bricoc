@@ -42,7 +42,7 @@ The admin receives a beautifully formatted HTML email with:
    - Full shipping address
 
 5. **⚠️ Action Required**
-   - Reminder to process and ship within 5-8 business days
+   - Reminder to process and ship within 3-4 business days
 
 6. **Footer**
    - Timestamp of payment
@@ -274,7 +274,7 @@ Subject: 💳 Stripe Payment Successful - Vintage Hoodie - $45.00
 │                                         │
 │ Please process this order and prepare   │
 │ it for shipping. The customer is        │
-│ expecting delivery within 5-8 business  │
+│ expecting delivery within 3-4 business  │
 │ days.                                   │
 │                                         │
 └─────────────────────────────────────────┘
